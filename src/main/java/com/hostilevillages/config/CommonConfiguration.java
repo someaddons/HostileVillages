@@ -1,7 +1,9 @@
 package com.hostilevillages.config;
 
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -9,9 +11,11 @@ public class CommonConfiguration
 {
     public final ForgeConfigSpec.ConfigValue<Integer>                vanillaVillageChance;
     public final ForgeConfigSpec.ConfigValue<Integer>                hostilePopulationSize;
+    public final ForgeConfigSpec.ConfigValue<Integer>                additionalStructuresWeight;
     public final ForgeConfigSpec.ConfigValue<Boolean>                generateLoot;
     public final ForgeConfigSpec.ConfigValue<Boolean>                allowVanillaVillagerSpawn;
     public final ForgeConfigSpec.ConfigValue<List<? extends String>> villageEntityTypes;
+    public final ForgeConfigSpec.ConfigValue<List<? extends String>> additionalStructures;
     public final ForgeConfigSpec.ConfigValue<List<? extends String>> loottables;
     public final ForgeConfigSpec                                     ForgeConfigSpecBuilder;
 
@@ -54,6 +58,15 @@ public class CommonConfiguration
             "minecraft:vindicator;minecraft:illusioner;5;9",
             "minecraft:pillager;minecraft:evoker;7;7")
           , e -> e instanceof String && ((String) e).contains(":"));
+
+        builder.comment(
+          "Additional structures to add as houses for spawning zombie villages, default: []. Example for bountiful and waystones support: [\"bountiful:village/common/bounty_gazebo\", \"waystones:village/common/waystone\"]");
+        additionalStructures = builder.defineList("additionalStructures",
+          ArrayList::new
+          , e -> e instanceof String && ResourceLocation.tryParse((String) e) != null);
+
+        builder.comment("Set higher to increase the amount of additional structures generated, note those replace houses, default: 2");
+        additionalStructuresWeight = builder.defineInRange("additionalStructuresWeight", 2, 1, 100);
 
         // Escapes the current category level
         builder.pop();

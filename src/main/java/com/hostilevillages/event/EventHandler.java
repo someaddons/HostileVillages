@@ -119,7 +119,7 @@ public class EventHandler
                     return;
                 }
 
-                entity.setPos(event.getEntity().blockPosition().getX(), event.getEntity().blockPosition().getY(), event.getEntity().blockPosition().getZ());
+                entity.setPos(event.getEntity().getX(), event.getEntity().getY(), event.getEntity().getZ());
                 toAdd.add(new Tuple<>(entity, event.getWorld()));
             }
         }

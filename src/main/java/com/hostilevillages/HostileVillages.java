@@ -13,6 +13,7 @@ import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.network.FMLNetworkConstants;
 import org.apache.logging.log4j.LogManager;
@@ -22,6 +23,7 @@ import java.util.*;
 import java.util.function.Function;
 
 import static com.hostilevillages.HostileVillages.MODID;
+import static net.minecraft.util.registry.Registry.TEMPLATE_POOL_REGISTRY;
 import static net.minecraft.world.gen.feature.template.ProcessorLists.*;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -43,6 +45,7 @@ public class HostileVillages
 
         Mod.EventBusSubscriber.Bus.MOD.bus().get().register(ModEventHandler.class);
         Mod.EventBusSubscriber.Bus.FORGE.bus().get().register(EventHandler.class);
+        Mod.EventBusSubscriber.Bus.FORGE.bus().get().addListener(this::serverStart);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
     }
 
@@ -50,6 +53,23 @@ public class HostileVillages
     {
         RandomVillageDataSet.parseFromConfig();
         LOGGER.info("Hostile Villages initialized");
+    }
+
+    private void serverStart(final FMLServerAboutToStartEvent event)
+    {
+        for (final String name : Arrays.asList("plains", "savanna", "snowy", "taiga", "desert"))
+        {
+            final List<JigsawPiece> list =
+              event.getServer().registryAccess().registry(TEMPLATE_POOL_REGISTRY).get().get(new ResourceLocation("minecraft:village/" + name + "/zombie/houses")).templates;
+
+            for (final String structure : HostileVillages.config.getCommonConfig().additionalStructures.get())
+            {
+                for (int i = 0; i < config.getCommonConfig().additionalStructuresWeight.get(); i++)
+                {
+                    list.add(JigsawPiece.legacy(structure).apply(JigsawPattern.PlacementBehaviour.RIGID));
+                }
+            }
+        }
     }
 
     /**

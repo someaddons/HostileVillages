@@ -4,10 +4,13 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.goal.BreakDoorGoal;
 import net.minecraft.entity.item.minecart.ChestMinecartEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.pathfinding.GroundPathNavigator;
+import net.minecraft.util.GroundPathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -79,6 +82,13 @@ public class RandomVillageDataSet
 
         entity.setPersistenceRequired();
 
+        // Register the break door goal once, it wont persist but let them break intial doors
+        entity.goalSelector.addGoal(0, new BreakDoorGoal(entity, difficulty -> true));
+        if (GroundPathHelper.hasGroundPathNavigation(entity))
+        {
+            ((GroundPathNavigator) entity.getNavigation()).setCanOpenDoors(true);
+        }
+
         if (!HostileVillages.config.getCommonConfig().generateLoot.get())
         {
             return;
@@ -93,7 +103,7 @@ public class RandomVillageDataSet
         if (HostileVillages.rand.nextInt(20) == 0)
         {
             final ChestMinecartEntity en = EntityType.CHEST_MINECART.create(entity.level);
-            en.setPos(entity.position().x, entity.position().y, entity.position().z);
+            en.setPos(entity.getX(), entity.getY(), entity.getZ());
             entity.level.addFreshEntity(en);
             en.setLootTable(loottables.get(HostileVillages.rand.nextInt(loottables.size())), HostileVillages.rand.nextInt(509));
 
