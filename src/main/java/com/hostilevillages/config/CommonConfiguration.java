@@ -38,7 +38,7 @@ public class CommonConfiguration
           )
           , e -> e instanceof String && ((String) e).contains(":"));
 
-        builder.comment("Whether to allow vanilla villagers to spawn at all, default: false");
+        builder.comment("Whether to allow vanilla villagers to spawn at all. If enabled then hostile villages will get a villager spawn egg added to their loot. default: false");
         allowVanillaVillagerSpawn = builder.define("allowVanillaVillagerSpawn", false);
 
         builder.comment(
