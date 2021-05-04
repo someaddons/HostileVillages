@@ -36,7 +36,7 @@ public class EventHandler
     @SubscribeEvent
     public static void onLivingSpawn(final LivingSpawnEvent.CheckSpawn event)
     {
-        if (event.getEntity().getType() != EntityType.ZOMBIE_VILLAGER)
+        if (event.getEntity().getType() != EntityType.ZOMBIE_VILLAGER || event.getEntity().level.isClientSide)
         {
             return;
         }
@@ -54,7 +54,7 @@ public class EventHandler
     @SubscribeEvent
     public static void onVillagerKill(final LivingConversionEvent.Pre event)
     {
-        if (!HostileVillages.config.getCommonConfig().allowVanillaVillagerSpawn.get())
+        if (!HostileVillages.config.getCommonConfig().allowVanillaVillagerSpawn.get() && !event.getEntity().level.isClientSide)
         {
             event.setCanceled(true);
         }
@@ -63,7 +63,7 @@ public class EventHandler
     @SubscribeEvent
     public static void onVillagerKill(final LivingConversionEvent.Post event)
     {
-        if (event.getOutcome().getType() != EntityType.ZOMBIE_VILLAGER)
+        if (event.getOutcome().getType() != EntityType.ZOMBIE_VILLAGER || event.getEntity().level.isClientSide)
         {
             return;
         }
@@ -75,6 +75,11 @@ public class EventHandler
     @SubscribeEvent
     public static void onEntityAdd(final EntityJoinWorldEvent event)
     {
+        if (event.getWorld().isClientSide)
+        {
+            return;
+        }
+
         if (event.getEntity() == excludedZombieVillager)
         {
             excludedZombieVillager = null;
@@ -90,14 +95,7 @@ public class EventHandler
 
             if (event.getEntity().blockPosition().distSqr(lastSpawn) > MAX_VILLAGE_DISTANCE)
             {
-                if (HostileVillages.rand.nextInt(100) < HostileVillages.config.getCommonConfig().vanillaVillageChance.get())
-                {
-                    villageDataSet = null;
-                }
-                else
-                {
-                    villageDataSet = new RandomVillageDataSet();
-                }
+                villageDataSet = new RandomVillageDataSet();
             }
 
             lastSpawn = event.getEntity().blockPosition();
@@ -128,7 +126,7 @@ public class EventHandler
     @SubscribeEvent
     public static void addToWorld(final TickEvent.WorldTickEvent event)
     {
-        if (event.phase == TickEvent.Phase.START)
+        if (event.phase == TickEvent.Phase.START || event.world.isClientSide)
         {
             return;
         }
