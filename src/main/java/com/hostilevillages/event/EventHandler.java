@@ -12,12 +12,11 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingConversionEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static net.minecraftforge.eventbus.api.Event.Result.DENY;
 
 /**
  * Handler to catch server tick events
@@ -27,11 +26,11 @@ public class EventHandler
     private final static int MAX_VILLAGE_DISTANCE = 200 * 200;
 
     private static BlockPos             lastSpawn      = BlockPos.ZERO;
-    private static RandomVillageDataSet villageDataSet = null;
+    private static RandomVillageDataSet villageDataSet = new RandomVillageDataSet();
 
     private static List<Tuple<Entity, World>> toAdd = new ArrayList<>();
 
-    private static Entity excludedZombieVillager;
+    private static EntityType excludedZombieVillager;
 
     @SubscribeEvent
     public static void onLivingSpawn(final LivingSpawnEvent.CheckSpawn event)
@@ -43,33 +42,26 @@ public class EventHandler
 
         if (HostileVillages.config.getCommonConfig().allowVanillaVillagerSpawn.get())
         {
-            event.setResult(DENY);
+            // Exclude from beeing replaced
+            excludedZombieVillager = event.getEntity().getType();
             return;
         }
-
-        // Exclude natural spawn from village mechanics
-        excludedZombieVillager = event.getEntity();
     }
 
-    @SubscribeEvent
-    public static void onVillagerKill(final LivingConversionEvent.Pre event)
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void preLivingConversionEvent(final LivingConversionEvent.Pre event)
     {
-        if (!HostileVillages.config.getCommonConfig().allowVanillaVillagerSpawn.get() && !event.getEntity().level.isClientSide)
+        if (!HostileVillages.config.getCommonConfig().allowVanillaVillagerSpawn.get())
         {
             event.setCanceled(true);
-        }
-    }
-
-    @SubscribeEvent
-    public static void onVillagerKill(final LivingConversionEvent.Post event)
-    {
-        if (event.getOutcome().getType() != EntityType.ZOMBIE_VILLAGER || event.getEntity().level.isClientSide)
-        {
             return;
         }
 
         // Exclude natural spawn from village mechanics
-        excludedZombieVillager = event.getOutcome();
+        if (!event.getEntity().level.isClientSide)
+        {
+            excludedZombieVillager = event.getOutcome();
+        }
     }
 
     @SubscribeEvent
@@ -80,7 +72,7 @@ public class EventHandler
             return;
         }
 
-        if (event.getEntity() == excludedZombieVillager)
+        if (event.getEntity().getType() == excludedZombieVillager)
         {
             excludedZombieVillager = null;
             return;

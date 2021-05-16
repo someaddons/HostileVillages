@@ -53,7 +53,6 @@ public class CommonConfiguration
             "minecraft:stray;minecraft:wither_skeleton;3;8",
             "minecraft:zombified_piglin;minecraft:pig;3;7",
             "minecraft:snow_golem;minecraft:sheep;3;5",
-            "minecraft:drowned;minecraft:silverfish;3;4",
             "minecraft:witch;minecraft:bat;3;15",
             "minecraft:vindicator;minecraft:illusioner;5;9",
             "minecraft:pillager;minecraft:evoker;7;7")
