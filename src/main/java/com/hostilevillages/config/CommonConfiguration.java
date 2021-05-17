@@ -54,7 +54,7 @@ public class CommonConfiguration
             "minecraft:zombified_piglin;minecraft:pig;3;7",
             "minecraft:snow_golem;minecraft:sheep;3;5",
             "minecraft:witch;minecraft:bat;3;15",
-            "minecraft:vindicator;minecraft:illusioner;5;9",
+            "minecraft:vindicator;minecraft:illusioner;5;3",
             "minecraft:pillager;minecraft:evoker;7;7")
           , e -> e instanceof String && ((String) e).contains(":"));
 

@@ -7,6 +7,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -40,25 +41,14 @@ public class EventHandler
             return;
         }
 
-        if (HostileVillages.config.getCommonConfig().allowVanillaVillagerSpawn.get())
-        {
-            // Exclude from beeing replaced
-            excludedZombieVillager = event.getEntity().getType();
-            return;
-        }
+        excludedZombieVillager = event.getEntity().getType();
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void preLivingConversionEvent(final LivingConversionEvent.Pre event)
     {
-        if (!HostileVillages.config.getCommonConfig().allowVanillaVillagerSpawn.get())
-        {
-            event.setCanceled(true);
-            return;
-        }
-
         // Exclude natural spawn from village mechanics
-        if (!event.getEntity().level.isClientSide)
+        if (!event.getEntity().level.isClientSide && event.getOutcome() == EntityType.ZOMBIE_VILLAGER)
         {
             excludedZombieVillager = event.getOutcome();
         }
@@ -75,44 +65,73 @@ public class EventHandler
         if (event.getEntity().getType() == excludedZombieVillager)
         {
             excludedZombieVillager = null;
-            return;
-        }
 
-        if (event.getEntity().getType() == EntityType.VILLAGER || event.getEntity().getType() == EntityType.ZOMBIE_VILLAGER)
-        {
-            if (HostileVillages.config.getCommonConfig().allowVanillaVillagerSpawn.get() && event.getEntity().getType() == EntityType.VILLAGER)
+            if (HostileVillages.config.getCommonConfig().allowVanillaVillagerSpawn.get())
             {
                 return;
             }
+        }
 
-            if (event.getEntity().blockPosition().distSqr(lastSpawn) > MAX_VILLAGE_DISTANCE)
+        if (replaceEntityOnSpawn(event.getEntity(), (IServerWorld) event.getWorld()))
+        {
+            event.setCanceled(true);
+        }
+    }
+
+    /**
+     * Replaces the spawning entity with a different entity
+     *
+     * @param entity entity to spawn
+     * @param world  world ot spawn in
+     * @return true if replaced
+     */
+    private static boolean replaceEntityOnSpawn(final Entity entity, final IServerWorld world)
+    {
+        if (entity.getType() == EntityType.VILLAGER || entity.getType() == EntityType.ZOMBIE_VILLAGER)
+        {
+            if (HostileVillages.config.getCommonConfig().allowVanillaVillagerSpawn.get() && entity.getType() == EntityType.VILLAGER)
+            {
+                return false;
+            }
+
+            if (entity.blockPosition().distSqr(lastSpawn) > MAX_VILLAGE_DISTANCE)
             {
                 villageDataSet = new RandomVillageDataSet();
             }
 
-            lastSpawn = event.getEntity().blockPosition();
+            lastSpawn = entity.blockPosition();
 
             if (villageDataSet == null)
             {
-                return;
+                return false;
             }
 
-            event.setCanceled(true);
-            event.getEntity().remove();
+            entity.remove();
+
+            boolean requirePersistance = entity instanceof MobEntity && ((MobEntity) entity).isPersistenceRequired();
 
             for (int i = 0; i < HostileVillages.config.getCommonConfig().hostilePopulationSize.get(); i++)
             {
-                final Entity entity = villageDataSet.getEntityReplacement().create(event.getWorld());
+                final Entity replacementEntity = villageDataSet.getEntityReplacement().create(world.getLevel());
 
-                if (entity == null)
+                if (!(replacementEntity instanceof MobEntity))
                 {
-                    return;
+                    continue;
                 }
 
-                entity.setPos(event.getEntity().getX(), event.getEntity().getY(), event.getEntity().getZ());
-                toAdd.add(new Tuple<>(entity, event.getWorld()));
+                if (requirePersistance)
+                {
+                    ((MobEntity) replacementEntity).setPersistenceRequired();
+                }
+
+                replacementEntity.setPos(entity.getX(), entity.getY(), entity.getZ());
+                toAdd.add(new Tuple<>(replacementEntity, world.getLevel()));
             }
+
+            return true;
         }
+
+        return false;
     }
 
     @SubscribeEvent
@@ -130,8 +149,7 @@ public class EventHandler
 
             if (villageDataSet != null && tuple.getA() instanceof MobEntity)
             {
-                ((MobEntity) tuple.getA()).setPersistenceRequired();
-                villageDataSet.onEntitySpawn((MobEntity) tuple.getA());
+                villageDataSet.onEntitySpawn((MobEntity) tuple.getA(), (IServerWorld) event.world);
             }
         }
     }

@@ -5,7 +5,8 @@
   "refmap": "hostilevillages.refmap.json",
   "mixins": [
     "ITagMixin",
-    "JigsawPatternRegistryMixin"
+    "JigsawPatternRegistryMixin",
+    "TemplateMixin"
   ],
   "client": [
   ],

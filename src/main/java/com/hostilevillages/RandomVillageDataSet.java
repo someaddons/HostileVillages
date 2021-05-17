@@ -12,6 +12,7 @@ import net.minecraft.item.Items;
 import net.minecraft.pathfinding.GroundPathNavigator;
 import net.minecraft.util.GroundPathHelper;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.IServerWorld;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
@@ -75,12 +76,10 @@ public class RandomVillageDataSet
      *
      * @param entity
      */
-    public void onEntitySpawn(final MobEntity entity)
+    public void onEntitySpawn(final MobEntity entity, final IServerWorld world)
     {
         // Sun lotion
         entity.equipItemIfPossible(Items.LEATHER_HELMET.getDefaultInstance());
-
-        entity.setPersistenceRequired();
 
         // Register the break door goal once, it wont persist but let them break intial doors
         entity.goalSelector.addGoal(0, new BreakDoorGoal(entity, difficulty -> true));
@@ -102,9 +101,9 @@ public class RandomVillageDataSet
 
         if (HostileVillages.rand.nextInt(20) == 0)
         {
-            final ChestMinecartEntity en = EntityType.CHEST_MINECART.create(entity.level);
+            final ChestMinecartEntity en = EntityType.CHEST_MINECART.create(world.getLevel());
             en.setPos(entity.getX(), entity.getY(), entity.getZ());
-            entity.level.addFreshEntity(en);
+            world.addFreshEntity(en);
             en.setLootTable(loottables.get(HostileVillages.rand.nextInt(loottables.size())), HostileVillages.rand.nextInt(509));
 
             if (HostileVillages.config.getCommonConfig().allowVanillaVillagerSpawn.get())
