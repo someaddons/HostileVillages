@@ -2,6 +2,7 @@ package com.hostilevillages;
 
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.BreakDoorGoal;
@@ -79,7 +80,10 @@ public class RandomVillageDataSet
     public void onEntitySpawn(final MobEntity entity, final IServerWorld world)
     {
         // Sun lotion
-        entity.equipItemIfPossible(Items.LEATHER_HELMET.getDefaultInstance());
+        if (entity.getMobType() == CreatureAttribute.UNDEAD)
+        {
+            entity.equipItemIfPossible(Items.LEATHER_HELMET.getDefaultInstance());
+        }
 
         // Register the break door goal once, it wont persist but let them break intial doors
         entity.goalSelector.addGoal(0, new BreakDoorGoal(entity, difficulty -> true));
@@ -93,7 +97,8 @@ public class RandomVillageDataSet
             return;
         }
 
-        if (mendingArmor != null && entity.equipItemIfPossible(mendingArmor))
+        if (mendingArmor != null && (entity.getMobType() == CreatureAttribute.UNDEAD || entity.getMobType() == CreatureAttribute.ILLAGER)
+              && entity.equipItemIfPossible(mendingArmor))
         {
             entity.setGuaranteedDrop(EquipmentSlotType.CHEST);
             mendingArmor = null;
