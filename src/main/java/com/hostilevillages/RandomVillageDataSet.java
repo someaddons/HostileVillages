@@ -43,6 +43,8 @@ public class RandomVillageDataSet
      */
     private ItemStack mendingArmor;
 
+    private int spawnedEntities = 0;
+
     public RandomVillageDataSet()
     {
         final int chosen = HostileVillages.rand.nextInt(totalWeight);
@@ -79,6 +81,7 @@ public class RandomVillageDataSet
      */
     public void onEntitySpawn(final MobEntity entity, final IServerWorld world)
     {
+        spawnedEntities++;
         // Sun lotion
         if (entity.getMobType() == CreatureAttribute.UNDEAD)
         {
@@ -97,7 +100,7 @@ public class RandomVillageDataSet
             return;
         }
 
-        if (mendingArmor != null && (entity.getMobType() == CreatureAttribute.UNDEAD || entity.getMobType() == CreatureAttribute.ILLAGER)
+        if (spawnedEntities > 15 && mendingArmor != null && (entity.getMobType() == CreatureAttribute.UNDEAD || entity.getMobType() == CreatureAttribute.ILLAGER)
               && entity.equipItemIfPossible(mendingArmor))
         {
             entity.setGuaranteedDrop(EquipmentSlotType.CHEST);
