@@ -123,6 +123,10 @@ public class EventHandler
                 {
                     ((MobEntity) replacementEntity).setPersistenceRequired();
                 }
+                else if (replacementEntity.getType().getCategory().isPersistent())
+                {
+                    continue;
+                }
 
                 replacementEntity.setPos(entity.getX(), entity.getY(), entity.getZ());
                 toAdd.add(new Tuple<>(replacementEntity, world.getLevel()));

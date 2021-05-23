@@ -1,18 +1,22 @@
 package com.hostilevillages;
 
 import com.google.common.collect.ImmutableList;
+import com.hostilevillages.command.CommandFindPersistent;
 import com.hostilevillages.config.Configuration;
 import com.hostilevillages.event.EventHandler;
 import com.hostilevillages.event.ModEventHandler;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import net.minecraft.command.CommandSource;
 import net.minecraft.tags.ITag;
 import net.minecraft.tags.ITagCollection;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.gen.feature.jigsaw.JigsawPattern;
 import net.minecraft.world.gen.feature.jigsaw.JigsawPiece;
 import net.minecraft.world.gen.feature.template.ProcessorLists;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -51,6 +55,7 @@ public class HostileVillages
         Mod.EventBusSubscriber.Bus.MOD.bus().get().register(ModEventHandler.class);
         Mod.EventBusSubscriber.Bus.FORGE.bus().get().register(EventHandler.class);
         Mod.EventBusSubscriber.Bus.FORGE.bus().get().addListener(this::serverStart);
+        Mod.EventBusSubscriber.Bus.FORGE.bus().get().addListener(this::onCommandsRegister);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
     }
 
@@ -58,6 +63,13 @@ public class HostileVillages
     {
         RandomVillageDataSet.parseFromConfig();
         LOGGER.info("Hostile Villages initialized");
+    }
+
+    public void onCommandsRegister(final RegisterCommandsEvent event)
+    {
+        LiteralArgumentBuilder<CommandSource> root = LiteralArgumentBuilder.literal("hostilevillages");
+        // Adds all command trees to the dispatcher to register the commands.
+        event.getDispatcher().register(root.then(new CommandFindPersistent().build()));
     }
 
     private void serverStart(final FMLServerAboutToStartEvent event)

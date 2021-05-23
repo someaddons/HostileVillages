@@ -5,6 +5,7 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.goal.BreakDoorGoal;
 import net.minecraft.entity.item.minecart.ChestMinecartEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -83,10 +84,12 @@ public class RandomVillageDataSet
     {
         spawnedEntities++;
         // Sun lotion
-        if (entity.getMobType() == CreatureAttribute.UNDEAD)
+        if (entity.getMobType() == CreatureAttribute.UNDEAD && entity.isPersistenceRequired())
         {
-            entity.equipItemIfPossible(Items.LEATHER_HELMET.getDefaultInstance());
+            entity.setItemSlot(EquipmentSlotType.HEAD, Items.LEATHER_HELMET.getDefaultInstance());
         }
+
+        entity.finalizeSpawn(world, world.getCurrentDifficultyAt(entity.blockPosition()), SpawnReason.STRUCTURE, null, null);
 
         // Register the break door goal once, it wont persist but let them break intial doors
         entity.goalSelector.addGoal(0, new BreakDoorGoal(entity, difficulty -> true));
@@ -100,14 +103,15 @@ public class RandomVillageDataSet
             return;
         }
 
-        if (spawnedEntities > 15 && mendingArmor != null && (entity.getMobType() == CreatureAttribute.UNDEAD || entity.getMobType() == CreatureAttribute.ILLAGER)
-              && entity.equipItemIfPossible(mendingArmor))
+        if (entity.isPersistenceRequired() && spawnedEntities > 12 && mendingArmor != null && (entity.getMobType() == CreatureAttribute.UNDEAD
+                                                                                                 || entity.getMobType() == CreatureAttribute.ILLAGER))
         {
+            entity.setItemSlot(EquipmentSlotType.CHEST, mendingArmor);
             entity.setGuaranteedDrop(EquipmentSlotType.CHEST);
             mendingArmor = null;
         }
 
-        if (HostileVillages.rand.nextInt(20) == 0)
+        if (spawnedEntities > 12 && HostileVillages.rand.nextInt(20) == 0)
         {
             final ChestMinecartEntity en = EntityType.CHEST_MINECART.create(world.getLevel());
             en.setPos(entity.getX(), entity.getY(), entity.getZ());
