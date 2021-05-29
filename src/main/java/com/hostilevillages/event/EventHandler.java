@@ -94,9 +94,10 @@ public class EventHandler
                 return false;
             }
 
-            if (entity.blockPosition().distSqr(lastSpawn) > MAX_VILLAGE_DISTANCE)
+            if (entity.blockPosition().distSqr(lastSpawn) > MAX_VILLAGE_DISTANCE || (villageDataSet != null && !villageDataSet.isValid(entity.level)))
             {
                 villageDataSet = new RandomVillageDataSet();
+                villageDataSet.setWorldTimeStart(entity.level.getGameTime());
             }
 
             lastSpawn = entity.blockPosition();

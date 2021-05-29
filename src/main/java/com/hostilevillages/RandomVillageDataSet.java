@@ -15,6 +15,7 @@ import net.minecraft.pathfinding.GroundPathNavigator;
 import net.minecraft.util.GroundPathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IServerWorld;
+import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
@@ -45,6 +46,8 @@ public class RandomVillageDataSet
     private ItemStack mendingArmor;
 
     private int spawnedEntities = 0;
+
+    private long worldTimeStart = 0;
 
     public RandomVillageDataSet()
     {
@@ -130,6 +133,16 @@ public class RandomVillageDataSet
                 }
             }
         }
+    }
+
+    public boolean isValid(final World world)
+    {
+        return (world.getGameTime() - worldTimeStart) < 20 * 120;
+    }
+
+    public void setWorldTimeStart(final long worldTimeStart)
+    {
+        this.worldTimeStart = worldTimeStart;
     }
 
     static class DataEntry
