@@ -129,6 +129,10 @@ public class EventHandler
                     continue;
                 }
 
+                if (HostileVillages.config.getCommonConfig().debugLog.get())
+                {
+                    HostileVillages.LOGGER.info("Replacing entity: " + entity + " with entity: " + replacementEntity);
+                }
                 replacementEntity.setPos(entity.getX(), entity.getY(), entity.getZ());
                 toAdd.add(new Tuple<>(replacementEntity, world.getLevel()));
             }

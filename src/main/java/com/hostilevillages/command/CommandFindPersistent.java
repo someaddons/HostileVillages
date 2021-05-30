@@ -4,7 +4,6 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.command.CommandSource;
-import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.INPC;
 import net.minecraft.entity.MobEntity;
@@ -68,7 +67,7 @@ public class CommandFindPersistent implements IMCOPCommand
             }
 
             // Instakill entities
-            if ((((MobEntity) searchEntity).getMobType() != CreatureAttribute.UNDEAD) && ((MobEntity) searchEntity).isPersistenceRequired())
+            if (searchEntity.getY() < 60 && ((MobEntity) searchEntity).isPersistenceRequired())
             {
                 if (ItemStack.matches(((MobEntity) searchEntity).getItemBySlot(EquipmentSlotType.HEAD), Items.LEATHER_HELMET.getDefaultInstance()))
                 {

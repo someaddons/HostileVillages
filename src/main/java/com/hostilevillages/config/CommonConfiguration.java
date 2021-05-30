@@ -13,6 +13,7 @@ public class CommonConfiguration
     public final ForgeConfigSpec.ConfigValue<Integer>                hostilePopulationSize;
     public final ForgeConfigSpec.ConfigValue<Integer>                additionalStructuresWeight;
     public final ForgeConfigSpec.ConfigValue<Boolean>                generateLoot;
+    public final ForgeConfigSpec.ConfigValue<Boolean>                debugLog;
     public final ForgeConfigSpec.ConfigValue<Boolean>                disableNoEntityDespawnWhenPickingItem;
     public final ForgeConfigSpec.ConfigValue<Boolean>                allowVanillaVillagerSpawn;
     public final ForgeConfigSpec.ConfigValue<List<? extends String>> villageEntityTypes;
@@ -31,6 +32,9 @@ public class CommonConfiguration
 
         builder.comment("Whether to generate extra loot for the village, default: true");
         generateLoot = builder.define("generateLoot", true);
+
+        builder.comment("Turn on debug messages for spawning, default: false");
+        debugLog = builder.define("debugLog", false);
 
         builder.comment("Disables entities beeing unable to despawn after they get an item equipped, default: true");
         disableNoEntityDespawnWhenPickingItem = builder.define("disableNoEntityDespawnWhenPickingItem", true);
