@@ -4,6 +4,8 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.command.CommandSource;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.INPC;
 import net.minecraft.entity.MobEntity;
@@ -11,7 +13,6 @@ import net.minecraft.entity.item.minecart.ChestMinecartEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.gen.feature.structure.Structure;
@@ -69,7 +70,9 @@ public class CommandFindPersistent implements IMCOPCommand
             // Instakill entities
             if (searchEntity.getY() < 60 && ((MobEntity) searchEntity).isPersistenceRequired())
             {
-                if (ItemStack.matches(((MobEntity) searchEntity).getItemBySlot(EquipmentSlotType.HEAD), Items.LEATHER_HELMET.getDefaultInstance()))
+                if (((MobEntity) searchEntity).getItemBySlot(EquipmentSlotType.HEAD).getItem() == Items.LEATHER_HELMET ||
+                      (((MobEntity) searchEntity).getItemBySlot(EquipmentSlotType.CHEST).getItem() == Items.IRON_CHESTPLATE
+                         && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MENDING, ((MobEntity) searchEntity).getItemBySlot(EquipmentSlotType.CHEST)) > 0))
                 {
                     searchEntity.remove();
                     killedEntities++;

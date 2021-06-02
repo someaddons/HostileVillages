@@ -124,15 +124,17 @@ public class EventHandler
                 {
                     ((MobEntity) replacementEntity).setPersistenceRequired();
                 }
-                else if (replacementEntity.getType().getCategory().isPersistent())
+                else if (replacementEntity.getType().getCategory().isPersistent() || ((MobEntity) replacementEntity).isPersistenceRequired())
                 {
                     continue;
                 }
 
                 if (HostileVillages.config.getCommonConfig().debugLog.get())
                 {
-                    HostileVillages.LOGGER.info("Replacing entity: " + entity + " with entity: " + replacementEntity);
+                    HostileVillages.LOGGER.info(
+                      "Replacing entity: " + entity + " with entity: " + replacementEntity + " persistence:" + ((MobEntity) replacementEntity).isPersistenceRequired());
                 }
+
                 replacementEntity.setPos(entity.getX(), entity.getY(), entity.getZ());
                 toAdd.add(new Tuple<>(replacementEntity, world.getLevel()));
             }
