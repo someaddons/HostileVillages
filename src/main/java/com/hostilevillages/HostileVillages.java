@@ -45,8 +45,6 @@ public class HostileVillages
     public static final Logger        LOGGER = LogManager.getLogger();
     public static       Configuration config = new Configuration();
 
-    static double percent = 0d;
-
     public HostileVillages()
     {
         ModLoadingContext.get()
@@ -95,58 +93,62 @@ public class HostileVillages
     private static Map<ResourceLocation, JigsawPattern> patterns = new HashMap<>();
     static
     {
-        percent = config.getCommonConfig().vanillaVillageChance.get() / 100d;
+        int villageChance = config.getCommonConfig().vanillaVillageChance.get();
+        int zombieChance = 100 - villageChance;
+
+        int villageMin = villageChance > 0 ? 1 : 0;
 
         JigsawPattern plains = new JigsawPattern(new ResourceLocation("village/plains/town_centers"),
           new ResourceLocation("empty"),
-          newListOf(Pair.of(JigsawPiece.legacy("village/plains/town_centers/plains_fountain_01", ProcessorLists.MOSSIFY_20_PERCENT), (int) (percent * 50)),
-            Pair.of(JigsawPiece.legacy("village/plains/town_centers/plains_meeting_point_1", ProcessorLists.MOSSIFY_20_PERCENT), (int) (percent * 50)),
-            Pair.of(JigsawPiece.legacy("village/plains/town_centers/plains_meeting_point_2"), (int) (percent * 50)),
-            Pair.of(JigsawPiece.legacy("village/plains/town_centers/plains_meeting_point_3", ProcessorLists.MOSSIFY_70_PERCENT), (int) (percent * 50)),
-            Pair.of(JigsawPiece.legacy("village/plains/zombie/town_centers/plains_fountain_01", ZOMBIE_PLAINS), 1),
-            Pair.of(JigsawPiece.legacy("village/plains/zombie/town_centers/plains_meeting_point_1", ZOMBIE_PLAINS), 1),
-            Pair.of(JigsawPiece.legacy("village/plains/zombie/town_centers/plains_meeting_point_2", ZOMBIE_PLAINS), 1),
-            Pair.of(JigsawPiece.legacy("village/plains/zombie/town_centers/plains_meeting_point_3", ZOMBIE_PLAINS), 1)),
+          newListOf(Pair.of(JigsawPiece.legacy("village/plains/town_centers/plains_fountain_01", ProcessorLists.MOSSIFY_20_PERCENT), Math.max(villageMin, villageChance / 4)),
+            Pair.of(JigsawPiece.legacy("village/plains/town_centers/plains_meeting_point_1", ProcessorLists.MOSSIFY_20_PERCENT), Math.max(villageMin, villageChance / 4)),
+            Pair.of(JigsawPiece.legacy("village/plains/town_centers/plains_meeting_point_2"), Math.max(villageMin, villageChance / 4)),
+            Pair.of(JigsawPiece.legacy("village/plains/town_centers/plains_meeting_point_3", ProcessorLists.MOSSIFY_70_PERCENT), Math.max(villageMin, villageChance / 4)),
+            Pair.of(JigsawPiece.legacy("village/plains/zombie/town_centers/plains_fountain_01", ZOMBIE_PLAINS), Math.max(1, zombieChance / 4)),
+            Pair.of(JigsawPiece.legacy("village/plains/zombie/town_centers/plains_meeting_point_1", ZOMBIE_PLAINS), Math.max(1, zombieChance / 4)),
+            Pair.of(JigsawPiece.legacy("village/plains/zombie/town_centers/plains_meeting_point_2", ZOMBIE_PLAINS), Math.max(1, zombieChance / 4)),
+            Pair.of(JigsawPiece.legacy("village/plains/zombie/town_centers/plains_meeting_point_3", ZOMBIE_PLAINS), Math.max(1, zombieChance / 4))),
           JigsawPattern.PlacementBehaviour.RIGID);
 
         JigsawPattern snowy = new JigsawPattern(new ResourceLocation("village/snowy/town_centers"),
           new ResourceLocation("empty"),
-          newListOf(Pair.of(JigsawPiece.legacy("village/snowy/town_centers/snowy_meeting_point_1"), (int) (percent * 100)),
-            Pair.of(JigsawPiece.legacy("village/snowy/town_centers/snowy_meeting_point_2"), (int) (percent * 50)),
-            Pair.of(JigsawPiece.legacy("village/snowy/town_centers/snowy_meeting_point_3"), (int) (percent * 150)),
-            Pair.of(JigsawPiece.legacy("village/snowy/zombie/town_centers/snowy_meeting_point_1"), 2),
-            Pair.of(JigsawPiece.legacy("village/snowy/zombie/town_centers/snowy_meeting_point_2"), 1),
-            Pair.of(JigsawPiece.legacy("village/snowy/zombie/town_centers/snowy_meeting_point_3"), 3)),
+          newListOf(Pair.of(JigsawPiece.legacy("village/snowy/town_centers/snowy_meeting_point_1"), Math.max(villageMin, villageChance / 3)),
+            Pair.of(JigsawPiece.legacy("village/snowy/town_centers/snowy_meeting_point_2"), Math.max(villageMin, villageChance / 6)),
+            Pair.of(JigsawPiece.legacy("village/snowy/town_centers/snowy_meeting_point_3"), Math.max(villageMin, villageChance / 2)),
+            Pair.of(JigsawPiece.legacy("village/snowy/zombie/town_centers/snowy_meeting_point_1"), Math.max(1, zombieChance / 3)),
+            Pair.of(JigsawPiece.legacy("village/snowy/zombie/town_centers/snowy_meeting_point_2"), Math.max(1, zombieChance / 6)),
+            Pair.of(JigsawPiece.legacy("village/snowy/zombie/town_centers/snowy_meeting_point_3"), Math.max(1, zombieChance / 2))),
           JigsawPattern.PlacementBehaviour.RIGID);
 
         JigsawPattern savanna = new JigsawPattern(new ResourceLocation("village/savanna/town_centers"),
           new ResourceLocation("empty"),
-          newListOf(Pair.of(JigsawPiece.legacy("village/savanna/town_centers/savanna_meeting_point_1"), (int) (percent * 100)),
-            Pair.of(JigsawPiece.legacy("village/savanna/town_centers/savanna_meeting_point_2"), (int) (percent * 50)),
-            Pair.of(JigsawPiece.legacy("village/savanna/town_centers/savanna_meeting_point_3"), (int) (percent * 150)),
-            Pair.of(JigsawPiece.legacy("village/savanna/town_centers/savanna_meeting_point_4"), (int) (percent * 150)),
-            Pair.of(JigsawPiece.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_1", ZOMBIE_SAVANNA), 2),
-            Pair.of(JigsawPiece.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_2", ZOMBIE_SAVANNA), 1),
-            Pair.of(JigsawPiece.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_3", ZOMBIE_SAVANNA), 3),
-            Pair.of(JigsawPiece.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_4", ZOMBIE_SAVANNA), 3)),
+          newListOf(Pair.of(JigsawPiece.legacy("village/savanna/town_centers/savanna_meeting_point_1"), (int) (Math.max(villageMin, villageChance / 4.5))),
+            Pair.of(JigsawPiece.legacy("village/savanna/town_centers/savanna_meeting_point_2"), (int) (Math.max(villageMin, villageChance / 9))),
+            Pair.of(JigsawPiece.legacy("village/savanna/town_centers/savanna_meeting_point_3"), (int) (Math.max(villageMin, villageChance / 3))),
+            Pair.of(JigsawPiece.legacy("village/savanna/town_centers/savanna_meeting_point_4"), (int) (Math.max(villageMin, villageChance / 3))),
+            Pair.of(JigsawPiece.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_1", ZOMBIE_SAVANNA), Math.max(1, (int) (zombieChance / 4.5))),
+            Pair.of(JigsawPiece.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_2", ZOMBIE_SAVANNA), Math.max(1, zombieChance / 9)),
+            Pair.of(JigsawPiece.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_3", ZOMBIE_SAVANNA), Math.max(1, zombieChance / 3)),
+            Pair.of(JigsawPiece.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_4", ZOMBIE_SAVANNA), Math.max(1, zombieChance / 3))),
           JigsawPattern.PlacementBehaviour.RIGID);
 
         JigsawPattern desert = new JigsawPattern(new ResourceLocation("village/desert/town_centers"),
           new ResourceLocation("empty"),
-          newListOf(Pair.of(JigsawPiece.legacy("village/desert/town_centers/desert_meeting_point_1"), (int) (percent * 98)),
-            Pair.of(JigsawPiece.legacy("village/desert/town_centers/desert_meeting_point_2"), (int) (percent * 98)),
-            Pair.of(JigsawPiece.legacy("village/desert/town_centers/desert_meeting_point_3"), (int) (percent * 49)),
-            Pair.of(JigsawPiece.legacy("village/desert/zombie/town_centers/desert_meeting_point_1", ZOMBIE_DESERT), 2),
-            Pair.of(JigsawPiece.legacy("village/desert/zombie/town_centers/desert_meeting_point_2", ZOMBIE_DESERT), 2),
-            Pair.of(JigsawPiece.legacy("village/desert/zombie/town_centers/desert_meeting_point_3", ZOMBIE_DESERT), 1)),
+          newListOf(Pair.of(JigsawPiece.legacy("village/desert/town_centers/desert_meeting_point_1"), (int) (Math.max(villageMin, villageChance / 2.5))),
+            Pair.of(JigsawPiece.legacy("village/desert/town_centers/desert_meeting_point_2"), (int) (Math.max(villageMin, villageChance / 2.5))),
+            Pair.of(JigsawPiece.legacy("village/desert/town_centers/desert_meeting_point_3"), (int) (Math.max(villageMin, villageChance / 5))),
+            Pair.of(JigsawPiece.legacy("village/desert/zombie/town_centers/desert_meeting_point_1", ZOMBIE_DESERT), Math.max(1, (int) (zombieChance / 2.5))),
+            Pair.of(JigsawPiece.legacy("village/desert/zombie/town_centers/desert_meeting_point_2", ZOMBIE_DESERT), Math.max(1, (int) (zombieChance / 2.5))),
+            Pair.of(JigsawPiece.legacy("village/desert/zombie/town_centers/desert_meeting_point_3", ZOMBIE_DESERT), Math.max(1, zombieChance / 5))),
           JigsawPattern.PlacementBehaviour.RIGID);
 
         JigsawPattern taiga = new JigsawPattern(new ResourceLocation("village/taiga/town_centers"),
           new ResourceLocation("empty"),
-          newListOf(Pair.of(JigsawPiece.legacy("village/taiga/town_centers/taiga_meeting_point_1", ProcessorLists.MOSSIFY_10_PERCENT), (int) (percent * 49)),
-            Pair.of(JigsawPiece.legacy("village/taiga/town_centers/taiga_meeting_point_2", ProcessorLists.MOSSIFY_10_PERCENT), (int) (percent * 49)),
-            Pair.of(JigsawPiece.legacy("village/taiga/zombie/town_centers/taiga_meeting_point_1", ZOMBIE_TAIGA), 1),
-            Pair.of(JigsawPiece.legacy("village/taiga/zombie/town_centers/taiga_meeting_point_2", ZOMBIE_TAIGA), 1)),
+          newListOf(Pair.of(JigsawPiece.legacy("village/taiga/town_centers/taiga_meeting_point_1", ProcessorLists.MOSSIFY_10_PERCENT),
+            (int) Math.max(villageMin, (villageChance / 2))),
+            Pair.of(JigsawPiece.legacy("village/taiga/town_centers/taiga_meeting_point_2", ProcessorLists.MOSSIFY_10_PERCENT), (int) Math.max(villageMin, (villageChance / 2))),
+            Pair.of(JigsawPiece.legacy("village/taiga/zombie/town_centers/taiga_meeting_point_1", ZOMBIE_TAIGA), Math.max(1, (int) (zombieChance / 2))),
+            Pair.of(JigsawPiece.legacy("village/taiga/zombie/town_centers/taiga_meeting_point_2", ZOMBIE_TAIGA), Math.max(1, (int) (zombieChance / 2)))),
           JigsawPattern.PlacementBehaviour.RIGID);
 
         patterns.put(plains.getName(), plains);
