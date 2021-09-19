@@ -1,21 +1,17 @@
 package com.hostilevillages;
 
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.CreatureAttribute;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.ai.goal.BreakDoorGoal;
-import net.minecraft.entity.item.minecart.ChestMinecartEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.pathfinding.GroundPathNavigator;
-import net.minecraft.util.GroundPathHelper;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.IServerWorld;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.goal.BreakDoorGoal;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.util.GoalUtils;
+import net.minecraft.world.entity.vehicle.MinecartChest;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
@@ -83,22 +79,22 @@ public class RandomVillageDataSet
      *
      * @param entity
      */
-    public void onEntitySpawn(final MobEntity entity, final IServerWorld world)
+    public void onEntitySpawn(final Mob entity, final ServerLevelAccessor world)
     {
         spawnedEntities++;
         // Sun lotion
-        if (entity.getMobType() == CreatureAttribute.UNDEAD && entity.isPersistenceRequired())
+        if (entity.getMobType() == MobType.UNDEAD && entity.isPersistenceRequired())
         {
-            entity.setItemSlot(EquipmentSlotType.HEAD, Items.LEATHER_HELMET.getDefaultInstance());
+            entity.setItemSlot(EquipmentSlot.HEAD, Items.LEATHER_HELMET.getDefaultInstance());
         }
 
-        entity.finalizeSpawn(world, world.getCurrentDifficultyAt(entity.blockPosition()), SpawnReason.STRUCTURE, null, null);
+        entity.finalizeSpawn(world, world.getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.STRUCTURE, null, null);
 
         // Register the break door goal once, it wont persist but let them break intial doors
         entity.goalSelector.addGoal(0, new BreakDoorGoal(entity, difficulty -> true));
-        if (GroundPathHelper.hasGroundPathNavigation(entity))
+        if (GoalUtils.hasGroundPathNavigation(entity))
         {
-            ((GroundPathNavigator) entity.getNavigation()).setCanOpenDoors(true);
+            ((GroundPathNavigation) entity.getNavigation()).setCanOpenDoors(true);
         }
 
         if (!HostileVillages.config.getCommonConfig().generateLoot.get())
@@ -106,17 +102,17 @@ public class RandomVillageDataSet
             return;
         }
 
-        if (entity.isPersistenceRequired() && spawnedEntities > 12 && mendingArmor != null && (entity.getMobType() == CreatureAttribute.UNDEAD
-                                                                                                 || entity.getMobType() == CreatureAttribute.ILLAGER))
+        if (entity.isPersistenceRequired() && spawnedEntities > 12 && mendingArmor != null && (entity.getMobType() == MobType.UNDEAD
+                                                                                                 || entity.getMobType() == MobType.ILLAGER))
         {
-            entity.setItemSlot(EquipmentSlotType.CHEST, mendingArmor);
-            entity.setGuaranteedDrop(EquipmentSlotType.CHEST);
+            entity.setItemSlot(EquipmentSlot.CHEST, mendingArmor);
+            entity.setGuaranteedDrop(EquipmentSlot.CHEST);
             mendingArmor = null;
         }
 
         if (entity.isPersistenceRequired() && spawnedEntities > 12 && HostileVillages.rand.nextInt(20) == 0)
         {
-            final ChestMinecartEntity en = EntityType.CHEST_MINECART.create(world.getLevel());
+            final MinecartChest en = EntityType.CHEST_MINECART.create(world.getLevel());
             en.setPos(entity.getX(), entity.getY(), entity.getZ());
             world.addFreshEntity(en);
             en.setLootTable(loottables.get(HostileVillages.rand.nextInt(loottables.size())), HostileVillages.rand.nextInt(509));
@@ -135,7 +131,7 @@ public class RandomVillageDataSet
         }
     }
 
-    public boolean isValid(final World world)
+    public boolean isValid(final Level world)
     {
         return (world.getGameTime() - worldTimeStart) < 20 * 120;
     }

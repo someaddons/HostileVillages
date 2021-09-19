@@ -1,13 +1,12 @@
 {
   "required": false,
   "package": "com.hostilevillages.mixin",
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "JAVA_16",
   "refmap": "hostilevillages.refmap.json",
   "mixins": [
-    "ITagMixin",
-    "JigsawPatternRegistryMixin",
-    "TemplateMixin",
-    "MobEntityPersistanceMixin"
+    "MobEntityPersistanceMixin",
+    "StructureTemplatePoolRegistryMixin",
+    "TemplateMixin"
   ],
   "client": [
   ],

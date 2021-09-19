@@ -2,13 +2,13 @@ package com.hostilevillages.event;
 
 import com.hostilevillages.HostileVillages;
 import com.hostilevillages.RandomVillageDataSet;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.MobEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IServerWorld;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingConversionEvent;
@@ -29,7 +29,7 @@ public class EventHandler
     private static BlockPos             lastSpawn      = BlockPos.ZERO;
     private static RandomVillageDataSet villageDataSet = new RandomVillageDataSet();
 
-    private static List<Tuple<Entity, World>> toAdd = new ArrayList<>();
+    private static List<Tuple<Entity, ServerLevel>> toAdd = new ArrayList<>();
 
     private static EntityType excludedZombieVillager;
 
@@ -72,7 +72,7 @@ public class EventHandler
             }
         }
 
-        if (replaceEntityOnSpawn(event.getEntity(), (IServerWorld) event.getWorld()))
+        if (replaceEntityOnSpawn(event.getEntity(), (ServerLevelAccessor) event.getWorld()))
         {
             event.setCanceled(true);
         }
@@ -85,7 +85,7 @@ public class EventHandler
      * @param world  world ot spawn in
      * @return true if replaced
      */
-    private static boolean replaceEntityOnSpawn(final Entity entity, final IServerWorld world)
+    private static boolean replaceEntityOnSpawn(final Entity entity, final ServerLevelAccessor world)
     {
         if (entity.getType() == EntityType.VILLAGER || entity.getType() == EntityType.ZOMBIE_VILLAGER)
         {
@@ -107,24 +107,24 @@ public class EventHandler
                 return false;
             }
 
-            entity.remove();
+            entity.remove(Entity.RemovalReason.DISCARDED);
 
-            boolean requirePersistance = entity instanceof MobEntity && ((MobEntity) entity).isPersistenceRequired();
+            boolean requirePersistance = entity instanceof Mob && ((Mob) entity).isPersistenceRequired();
 
             for (int i = 0; i < HostileVillages.config.getCommonConfig().hostilePopulationSize.get(); i++)
             {
                 final Entity replacementEntity = villageDataSet.getEntityReplacement().create(world.getLevel());
 
-                if (!(replacementEntity instanceof MobEntity))
+                if (!(replacementEntity instanceof Mob))
                 {
                     continue;
                 }
 
                 if (requirePersistance)
                 {
-                    ((MobEntity) replacementEntity).setPersistenceRequired();
+                    ((Mob) replacementEntity).setPersistenceRequired();
                 }
-                else if (replacementEntity.getType().getCategory().isPersistent() || ((MobEntity) replacementEntity).isPersistenceRequired())
+                else if (replacementEntity.getType().getCategory().isPersistent() || ((Mob) replacementEntity).isPersistenceRequired())
                 {
                     continue;
                 }
@@ -132,7 +132,7 @@ public class EventHandler
                 if (HostileVillages.config.getCommonConfig().debugLog.get())
                 {
                     HostileVillages.LOGGER.info(
-                      "Replacing entity: " + entity + " with entity: " + replacementEntity + " persistence:" + ((MobEntity) replacementEntity).isPersistenceRequired());
+                      "Replacing entity: " + entity + " with entity: " + replacementEntity + " persistence:" + ((Mob) replacementEntity).isPersistenceRequired());
                 }
 
                 replacementEntity.setPos(entity.getX(), entity.getY(), entity.getZ());
@@ -155,12 +155,12 @@ public class EventHandler
 
         if (!toAdd.isEmpty())
         {
-            Tuple<Entity, World> tuple = toAdd.remove(0);
+            Tuple<Entity, ServerLevel> tuple = toAdd.remove(0);
             tuple.getB().addFreshEntity(tuple.getA());
 
-            if (villageDataSet != null && tuple.getA() instanceof MobEntity)
+            if (villageDataSet != null && tuple.getA() instanceof Mob)
             {
-                villageDataSet.onEntitySpawn((MobEntity) tuple.getA(), (IServerWorld) event.world);
+                villageDataSet.onEntitySpawn((Mob) tuple.getA(), (ServerLevel) event.world);
             }
         }
     }
