@@ -17,13 +17,13 @@ import net.minecraft.tags.TagCollection;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fmlserverevents.FMLServerAboutToStartEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -69,7 +69,7 @@ public class HostileVillages
         event.getDispatcher().register(root.then(new CommandFindPersistent().build()));
     }
 
-    private void serverStart(final FMLServerAboutToStartEvent event)
+    private void serverStart(final ServerAboutToStartEvent event)
     {
         for (final String name : Arrays.asList("plains", "savanna", "snowy", "taiga", "desert"))
         {
