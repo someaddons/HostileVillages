@@ -44,6 +44,17 @@ public class EventHandler
         excludedZombieVillager = event.getEntity().getType();
     }
 
+    @SubscribeEvent
+    public static void onSpecialSpawn(final LivingSpawnEvent.SpecialSpawn event)
+    {
+        if (event.getEntity().getType() != EntityType.ZOMBIE_VILLAGER || event.getEntity().level.isClientSide)
+        {
+            return;
+        }
+
+        excludedZombieVillager = event.getEntity().getType();
+    }
+
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void preLivingConversionEvent(final LivingConversionEvent.Pre event)
     {
