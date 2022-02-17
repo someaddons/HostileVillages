@@ -118,6 +118,11 @@ public class EventHandler
                 return false;
             }
 
+            if (entity.getType() == EntityType.VILLAGER && entity.getTags().contains("feywild_librarian"))
+            {
+                return false;
+            }
+
             entity.remove(Entity.RemovalReason.DISCARDED);
 
             boolean requirePersistance = entity instanceof Mob && ((Mob) entity).isPersistenceRequired();
