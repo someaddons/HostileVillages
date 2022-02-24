@@ -1,5 +1,6 @@
 package com.hostilevillages.mixin;
 
+import com.hostilevillages.event.EventHandler;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -17,17 +18,19 @@ import java.util.Optional;
 public class TemplateMixin
 {
     @Inject(method = "createEntityIgnoreException", at = @At("RETURN"))
-    private static void onEntitySpawn(final ServerLevelAccessor p_215382_0_, final CompoundTag p_215382_1_, final CallbackInfoReturnable<Optional<Entity>> cir)
+    private static void onEntitySpawn(final ServerLevelAccessor world, final CompoundTag p_215382_1_, final CallbackInfoReturnable<Optional<Entity>> cir)
     {
         if (cir.getReturnValue().isPresent())
         {
             final Entity entity = cir.getReturnValue().get();
+            if (entity instanceof Mob)
+            {
+                ((Mob) entity).setPersistenceRequired();
+            }
+
             if (entity.getType() == EntityType.ZOMBIE_VILLAGER || entity.getType() == EntityType.VILLAGER)
             {
-                if (entity instanceof Mob)
-                {
-                    ((Mob) entity).setPersistenceRequired();
-                }
+                EventHandler.replaceEntityOnSpawn(entity, world);
             }
         }
     }

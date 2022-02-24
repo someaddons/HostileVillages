@@ -73,14 +73,14 @@ public class EventHandler
             return;
         }
 
-        if (event.getEntity().getType() == excludedZombieVillager)
+        if (HostileVillages.config.getCommonConfig().allowVanillaVillagerSpawn.get())
         {
-            excludedZombieVillager = null;
+            return;
+        }
 
-            if (HostileVillages.config.getCommonConfig().allowVanillaVillagerSpawn.get())
-            {
-                return;
-            }
+        if (event.getEntity().getType() == EntityType.ZOMBIE_VILLAGER)
+        {
+            return;
         }
 
         if (replaceEntityOnSpawn(event.getEntity(), (ServerLevelAccessor) event.getWorld()))
@@ -96,7 +96,7 @@ public class EventHandler
      * @param world  world ot spawn in
      * @return true if replaced
      */
-    private static boolean replaceEntityOnSpawn(final Entity entity, final ServerLevelAccessor world)
+    public static boolean replaceEntityOnSpawn(final Entity entity, final ServerLevelAccessor world)
     {
         if (entity.getType() == EntityType.VILLAGER || entity.getType() == EntityType.ZOMBIE_VILLAGER)
         {
@@ -130,6 +130,12 @@ public class EventHandler
             for (int i = 0; i < HostileVillages.config.getCommonConfig().hostilePopulationSize.get(); i++)
             {
                 final Entity replacementEntity = villageDataSet.getEntityReplacement().create(world.getLevel());
+
+                if (replacementEntity.getType() == EntityType.VILLAGER)
+                {
+                    // Do not circle spawn entities
+                    continue;
+                }
 
                 if (!(replacementEntity instanceof Mob))
                 {
@@ -171,12 +177,15 @@ public class EventHandler
 
         if (!toAdd.isEmpty())
         {
-            Tuple<Entity, ServerLevel> tuple = toAdd.remove(0);
-            tuple.getB().addFreshEntity(tuple.getA());
-
-            if (villageDataSet != null && tuple.getA() instanceof Mob)
+            while (!toAdd.isEmpty())
             {
-                villageDataSet.onEntitySpawn((Mob) tuple.getA(), (ServerLevel) event.world);
+                Tuple<Entity, ServerLevel> tuple = toAdd.remove(0);
+                tuple.getB().addFreshEntity(tuple.getA());
+
+                if (villageDataSet != null && tuple.getA() instanceof Mob)
+                {
+                    villageDataSet.onEntitySpawn((Mob) tuple.getA(), (ServerLevel) event.world);
+                }
             }
         }
     }
