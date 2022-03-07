@@ -110,7 +110,7 @@ public class RandomVillageDataSet
             mendingArmor = null;
         }
 
-        if (entity.isPersistenceRequired() && spawnedEntities > 12 && spawnedEntities % 5 == 0)
+        if (entity.isPersistenceRequired() && spawnedEntities > 12 && spawnedEntities % 5 == 0 && spawnedEntities <= 20)
         {
             final MinecartChest en = EntityType.CHEST_MINECART.create(world.getLevel());
             en.setPos(entity.getX(), entity.getY(), entity.getZ());
