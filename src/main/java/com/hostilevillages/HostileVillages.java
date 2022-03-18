@@ -7,15 +7,11 @@ import com.hostilevillages.event.EventHandler;
 import com.hostilevillages.event.ModEventHandler;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.data.worldgen.ProcessorLists;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagCollection;
-import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
-import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
+import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.fml.IExtensionPoint;
@@ -29,7 +25,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static com.hostilevillages.HostileVillages.MODID;
 import static net.minecraft.core.Registry.TEMPLATE_POOL_REGISTRY;
@@ -179,46 +174,5 @@ public class HostileVillages
         List<Pair<Function<StructureTemplatePool.Projection, ? extends StructurePoolElement>, Integer>> list = new ArrayList<>(Arrays.asList(args));
         list.removeIf(element -> element.getSecond() <= 0);
         return ImmutableList.copyOf(list);
-    }
-
-    /**
-     * Put here instead of in the interface, due to java 11 breaking with interface lambdas
-     *
-     * @param iTagCollection
-     * @param <T>
-     * @return
-     */
-    public static <T> Codec<Tag<T>> tagCodec(Supplier<TagCollection<T>> iTagCollection)
-    {
-        return ResourceLocation.CODEC.flatXmap((p_232949_1_) -> {
-            return Optional.ofNullable(iTagCollection.get().getTag(p_232949_1_)).map(DataResult::success).orElseGet(() -> {
-                return DataResult.error("Unknown tag: " + p_232949_1_);
-            });
-        }, (tag) -> {
-
-            ResourceLocation id = iTagCollection.get().getId(tag);
-            if (id == null)
-            {
-                // Fallback id lookup
-                Collection<ResourceLocation> tags = iTagCollection.get().getMatchingTags(tag.getValues().get(0));
-
-                for (final ResourceLocation currentID : tags)
-                {
-                    final Tag compare = iTagCollection.get().getTag(currentID);
-                    if (compare != null)
-                    {
-                        if (compare.getValues().equals(tag.getValues()))
-                        {
-                            id = currentID;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            return Optional.ofNullable(id).map(DataResult::success).orElseGet(() -> {
-                return DataResult.error("Unknown tag: " + tag);
-            });
-        });
     }
 }

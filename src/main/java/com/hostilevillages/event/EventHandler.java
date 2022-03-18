@@ -184,7 +184,7 @@ public class EventHandler
 
                 if (villageDataSet != null && tuple.getA() instanceof Mob)
                 {
-                    villageDataSet.onEntitySpawn((Mob) tuple.getA(), (ServerLevel) event.world);
+                    villageDataSet.onEntitySpawn((Mob) tuple.getA(), tuple.getB());
                 }
             }
         }

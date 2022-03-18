@@ -16,7 +16,7 @@ import net.minecraft.world.entity.vehicle.MinecartChest;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 
 import java.util.HashSet;
@@ -89,7 +89,7 @@ public class CommandFindPersistent implements IMCOPCommand
             if (((Mob) searchEntity).isPersistenceRequired() && !visited.contains(searchEntity))
             {
                 boolean isInStructure = false;
-                for (final Map.Entry<StructureFeature<?>, StructureStart<?>> entry : ((ServerLevel) searchEntity.level).getChunk(searchEntity.getBlockX() >> 4,
+                for (final Map.Entry<ConfiguredStructureFeature<?, ?>, StructureStart> entry : ((ServerLevel) searchEntity.level).getChunk(searchEntity.getBlockX() >> 4,
                     searchEntity.getBlockZ() >> 4)
                   .getAllStarts()
                   .entrySet())
