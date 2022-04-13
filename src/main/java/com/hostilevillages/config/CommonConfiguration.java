@@ -13,6 +13,7 @@ public class CommonConfiguration
     public final ForgeConfigSpec.ConfigValue<Integer>                hostilePopulationSize;
     public final ForgeConfigSpec.ConfigValue<Integer>                additionalStructuresWeight;
     public final ForgeConfigSpec.ConfigValue<Boolean>                generateLoot;
+    public final ForgeConfigSpec.ConfigValue<Boolean>                villagesSpawnEggLoot;
     public final ForgeConfigSpec.ConfigValue<Boolean>                debugLog;
     public final ForgeConfigSpec.ConfigValue<Boolean>                disableNoEntityDespawnWhenPickingItem;
     public final ForgeConfigSpec.ConfigValue<Boolean>                allowVanillaVillagerSpawn;
@@ -46,8 +47,11 @@ public class CommonConfiguration
           )
           , e -> e instanceof String && ((String) e).contains(":"));
 
-        builder.comment("Whether to allow vanilla villagers to spawn at all. If enabled then hostile villages will get a villager spawn egg added to their loot. default: false");
+        builder.comment("Whether to allow vanilla villagers to spawn at all. default: false");
         allowVanillaVillagerSpawn = builder.define("allowVanillaVillagerSpawn", false);
+
+        builder.comment("If enabled and vanilla villager spawn is enabled then hostile villages will get a villager spawn egg added to their loot. default: true");
+        villagesSpawnEggLoot = builder.define("villagesSpawnEggLoot", true);
 
         builder.comment(
           "List of entity pairs which spawn in villages. Format = entity1;entity2;5;6   5 is the chance of entity2(one in five), 6 is the total weight of this whole entry to be chosen");

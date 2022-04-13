@@ -117,7 +117,7 @@ public class RandomVillageDataSet
             world.addFreshEntity(en);
             en.setLootTable(loottables.get(HostileVillages.rand.nextInt(loottables.size())), HostileVillages.rand.nextInt(509));
 
-            if (HostileVillages.config.getCommonConfig().allowVanillaVillagerSpawn.get())
+            if (HostileVillages.config.getCommonConfig().allowVanillaVillagerSpawn.get() && HostileVillages.config.getCommonConfig().villagesSpawnEggLoot.get())
             {
                 for (int i = 0; i < 27; i++)
                 {
