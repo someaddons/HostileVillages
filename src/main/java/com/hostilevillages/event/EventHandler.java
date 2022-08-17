@@ -10,7 +10,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingConversionEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -66,9 +66,9 @@ public class EventHandler
     }
 
     @SubscribeEvent
-    public static void onEntityAdd(final EntityJoinWorldEvent event)
+    public static void onEntityAdd(final EntityJoinLevelEvent event)
     {
-        if (event.getWorld().isClientSide)
+        if (event.getLevel().isClientSide)
         {
             return;
         }
@@ -83,7 +83,7 @@ public class EventHandler
             return;
         }
 
-        if (replaceEntityOnSpawn(event.getEntity(), (ServerLevelAccessor) event.getWorld()))
+        if (replaceEntityOnSpawn(event.getEntity(), (ServerLevelAccessor) event.getLevel()))
         {
             event.setCanceled(true);
         }
@@ -168,9 +168,9 @@ public class EventHandler
     }
 
     @SubscribeEvent
-    public static void addToWorld(final TickEvent.WorldTickEvent event)
+    public static void addToWorld(final TickEvent.LevelTickEvent event)
     {
-        if (event.phase == TickEvent.Phase.START || event.world.isClientSide)
+        if (event.phase == TickEvent.Phase.START || event.level.isClientSide)
         {
             return;
         }

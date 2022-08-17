@@ -178,7 +178,7 @@ public class RandomVillageDataSet
                 continue;
             }
 
-            final EntityType mainType = ForgeRegistries.ENTITIES.getValue(main);
+            final EntityType mainType = ForgeRegistries.ENTITY_TYPES.getValue(main);
             if (mainType == null)
             {
                 HostileVillages.LOGGER.error("Config entry could not be parsed, not a valid entity type" + splitEntry[0]);
@@ -192,7 +192,7 @@ public class RandomVillageDataSet
                 continue;
             }
 
-            final EntityType secondaryType = ForgeRegistries.ENTITIES.getValue(secondary);
+            final EntityType secondaryType = ForgeRegistries.ENTITY_TYPES.getValue(secondary);
             if (secondaryType == null)
             {
                 HostileVillages.LOGGER.error("Config entry could not be parsed, not a valid entity type" + splitEntry[1]);

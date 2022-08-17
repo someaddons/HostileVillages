@@ -4,7 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -16,7 +16,7 @@ import net.minecraft.world.entity.vehicle.MinecartChest;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 
 import java.util.HashSet;
@@ -58,7 +58,7 @@ public class CommandFindPersistent implements IMCOPCommand
             {
                 visited.add(searchEntity);
                 player.teleportTo(searchEntity.getX(), searchEntity.getY(), searchEntity.getZ());
-                source.sendSuccess(new TextComponent("Found entity:" + searchEntity.getDisplayName().getString()), false);
+                source.sendSuccess(Component.literal("Found entity:" + searchEntity.getDisplayName().getString()), false);
                 break;
             }
 
@@ -89,7 +89,7 @@ public class CommandFindPersistent implements IMCOPCommand
             if (((Mob) searchEntity).isPersistenceRequired() && !visited.contains(searchEntity))
             {
                 boolean isInStructure = false;
-                for (final Map.Entry<ConfiguredStructureFeature<?, ?>, StructureStart> entry : ((ServerLevel) searchEntity.level).getChunk(searchEntity.getBlockX() >> 4,
+                for (final Map.Entry<Structure, StructureStart> entry : ((ServerLevel) searchEntity.level).getChunk(searchEntity.getBlockX() >> 4,
                     searchEntity.getBlockZ() >> 4)
                   .getAllStarts()
                   .entrySet())
@@ -105,8 +105,8 @@ public class CommandFindPersistent implements IMCOPCommand
                 {
                     visited.add(searchEntity);
                     player.teleportTo(searchEntity.getX(), searchEntity.getY(), searchEntity.getZ());
-                    source.sendSuccess(new TextComponent("Found entity:" + searchEntity.getDisplayName().getString()), false);
-                    source.sendSuccess(new TextComponent("Killed entities:" + killedEntities), false);
+                    source.sendSuccess(Component.literal("Found entity:" + searchEntity.getDisplayName().getString()), false);
+                    source.sendSuccess(Component.literal("Killed entities:" + killedEntities), false);
                     break;
                 }
             }
@@ -134,7 +134,7 @@ public class CommandFindPersistent implements IMCOPCommand
             return 0;
         }
 
-        context.getSource().sendSuccess(new TextComponent("Cleared visited entity list"), false);
+        context.getSource().sendSuccess(Component.literal("Cleared visited entity list"), false);
         visited = new HashSet<>();
         return 0;
     }
