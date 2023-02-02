@@ -4,8 +4,8 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "hostilevillages.refmap.json",
   "mixins": [
+    "LegacyRandomSourceMixin",
     "MobEntityPersistanceMixin",
-    "StructureTemplatePoolRegistryMixin",
     "TemplateMixin"
   ],
   "client": [

@@ -8,10 +8,15 @@ import com.hostilevillages.event.ModEventHandler;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.ProcessorLists;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.fml.IExtensionPoint;
@@ -27,8 +32,6 @@ import java.util.*;
 import java.util.function.Function;
 
 import static com.hostilevillages.HostileVillages.MODID;
-import static net.minecraft.core.Registry.TEMPLATE_POOL_REGISTRY;
-import static net.minecraft.data.worldgen.ProcessorLists.*;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(MODID)
@@ -36,9 +39,10 @@ public class HostileVillages
 {
     public static final String MODID = "hostilevillages";
 
-    public static final Random        rand   = new Random();
-    public static final Logger        LOGGER = LogManager.getLogger();
-    public static       Configuration config = new Configuration();
+    public static final Random                               rand     = new Random();
+    public static final Logger                               LOGGER   = LogManager.getLogger();
+    public static       Configuration                        config   = new Configuration();
+    public static       Map<ResourceLocation, ImmutableList> villages = new HashMap<>();
 
     public HostileVillages()
     {
@@ -66,10 +70,11 @@ public class HostileVillages
 
     private void serverStart(final ServerAboutToStartEvent event)
     {
+        loadWorldgen(event.getServer());
         for (final String name : Arrays.asList("plains", "savanna", "snowy", "taiga", "desert"))
         {
             final List<StructurePoolElement> list =
-              event.getServer().registryAccess().registry(TEMPLATE_POOL_REGISTRY).get().get(new ResourceLocation("minecraft:village/" + name + "/zombie/houses")).templates;
+              event.getServer().registryAccess().registry(Registries.TEMPLATE_POOL).get().get(new ResourceLocation("minecraft:village/" + name + "/zombie/houses")).templates;
 
             for (final String structure : HostileVillages.config.getCommonConfig().additionalStructures.get())
             {
@@ -81,42 +86,48 @@ public class HostileVillages
         }
     }
 
-    /**
-     * Predefined patterns
-     */
-    private static Map<ResourceLocation, StructureTemplatePool> patterns = new HashMap<>();
-    static
+    public static void loadWorldgen(final MinecraftServer server)
     {
+        HolderGetter<StructureProcessorList> holdergetter1 = server.registryAccess().lookup(Registries.PROCESSOR_LIST).get();
+        Holder<StructureProcessorList> MOSSIFY_20_PERCENT = holdergetter1.getOrThrow(ProcessorLists.MOSSIFY_20_PERCENT);
+        Holder<StructureProcessorList> MOSSIFY_10_PERCENT = holdergetter1.getOrThrow(ProcessorLists.MOSSIFY_10_PERCENT);
+        Holder<StructureProcessorList> MOSSIFY_70_PERCENT = holdergetter1.getOrThrow(ProcessorLists.MOSSIFY_70_PERCENT);
+        Holder<StructureProcessorList> ZOMBIE_PLAINS = holdergetter1.getOrThrow(ProcessorLists.ZOMBIE_PLAINS);
+        Holder<StructureProcessorList> ZOMBIE_SAVANNA = holdergetter1.getOrThrow(ProcessorLists.ZOMBIE_SAVANNA);
+        Holder<StructureProcessorList> ZOMBIE_DESERT = holdergetter1.getOrThrow(ProcessorLists.ZOMBIE_DESERT);
+        Holder<StructureProcessorList> ZOMBIE_TAIGA = holdergetter1.getOrThrow(ProcessorLists.ZOMBIE_TAIGA);
+
         int villageChance = config.getCommonConfig().vanillaVillageChance.get();
         int zombieChance = 100 - villageChance;
 
         int villageMin = villageChance > 0 ? 1 : 0;
 
-        StructureTemplatePool plains = new StructureTemplatePool(new ResourceLocation("village/plains/town_centers"),
-          new ResourceLocation("empty"),
-          newListOf(Pair.of(StructurePoolElement.legacy("village/plains/town_centers/plains_fountain_01", ProcessorLists.MOSSIFY_20_PERCENT),
-              Math.max(villageMin, villageChance / 4)),
-            Pair.of(StructurePoolElement.legacy("village/plains/town_centers/plains_meeting_point_1", ProcessorLists.MOSSIFY_20_PERCENT), Math.max(villageMin, villageChance / 4)),
-            Pair.of(StructurePoolElement.legacy("village/plains/town_centers/plains_meeting_point_2"), Math.max(villageMin, villageChance / 4)),
-            Pair.of(StructurePoolElement.legacy("village/plains/town_centers/plains_meeting_point_3", ProcessorLists.MOSSIFY_70_PERCENT), Math.max(villageMin, villageChance / 4)),
-            Pair.of(StructurePoolElement.legacy("village/plains/zombie/town_centers/plains_fountain_01", ZOMBIE_PLAINS), Math.max(1, zombieChance / 4)),
-            Pair.of(StructurePoolElement.legacy("village/plains/zombie/town_centers/plains_meeting_point_1", ZOMBIE_PLAINS), Math.max(1, zombieChance / 4)),
-            Pair.of(StructurePoolElement.legacy("village/plains/zombie/town_centers/plains_meeting_point_2", ZOMBIE_PLAINS), Math.max(1, zombieChance / 4)),
-            Pair.of(StructurePoolElement.legacy("village/plains/zombie/town_centers/plains_meeting_point_3", ZOMBIE_PLAINS), Math.max(1, zombieChance / 4))),
-          StructureTemplatePool.Projection.RIGID);
+        ImmutableList plains = HostileVillages.newListOf(Pair.of(StructurePoolElement.legacy("village/plains/town_centers/plains_fountain_01",
+              MOSSIFY_20_PERCENT),
+            Math.max(villageMin, villageChance / 4)),
+          Pair.of(StructurePoolElement.legacy("village/plains/town_centers/plains_meeting_point_1", MOSSIFY_20_PERCENT),
+            Math.max(villageMin, villageChance / 4)),
+          Pair.of(StructurePoolElement.legacy("village/plains/town_centers/plains_meeting_point_2"), Math.max(villageMin, villageChance / 4)),
+          Pair.of(StructurePoolElement.legacy("village/plains/town_centers/plains_meeting_point_3", MOSSIFY_70_PERCENT),
+            Math.max(villageMin, villageChance / 4)),
+          Pair.of(StructurePoolElement.legacy("village/plains/zombie/town_centers/plains_fountain_01", ZOMBIE_PLAINS), Math.max(1, zombieChance / 4)),
+          Pair.of(StructurePoolElement.legacy("village/plains/zombie/town_centers/plains_meeting_point_1", ZOMBIE_PLAINS), Math.max(1, zombieChance / 4)),
+          Pair.of(StructurePoolElement.legacy("village/plains/zombie/town_centers/plains_meeting_point_2", ZOMBIE_PLAINS), Math.max(1, zombieChance / 4)),
+          Pair.of(StructurePoolElement.legacy("village/plains/zombie/town_centers/plains_meeting_point_3", ZOMBIE_PLAINS), Math.max(1, zombieChance / 4)));
 
-        StructureTemplatePool snowy = new StructureTemplatePool(new ResourceLocation("village/snowy/town_centers"),
-          new ResourceLocation("empty"),
-          newListOf(Pair.of(StructurePoolElement.legacy("village/snowy/town_centers/snowy_meeting_point_1"), Math.max(villageMin, villageChance / 3)),
-            Pair.of(StructurePoolElement.legacy("village/snowy/town_centers/snowy_meeting_point_2"), Math.max(villageMin, villageChance / 6)),
-            Pair.of(StructurePoolElement.legacy("village/snowy/town_centers/snowy_meeting_point_3"), Math.max(villageMin, villageChance / 2)),
-            Pair.of(StructurePoolElement.legacy("village/snowy/zombie/town_centers/snowy_meeting_point_1"), Math.max(1, zombieChance / 3)),
-            Pair.of(StructurePoolElement.legacy("village/snowy/zombie/town_centers/snowy_meeting_point_2"), Math.max(1, zombieChance / 6)),
-            Pair.of(StructurePoolElement.legacy("village/snowy/zombie/town_centers/snowy_meeting_point_3"), Math.max(1, zombieChance / 2))),
-          StructureTemplatePool.Projection.RIGID);
+        villages.put(new ResourceLocation("village/plains/terminators"), plains);
 
-        StructureTemplatePool savanna = new StructureTemplatePool(new ResourceLocation("village/savanna/town_centers"),
-          new ResourceLocation("empty"),
+
+        ImmutableList snowy = newListOf(Pair.of(StructurePoolElement.legacy("village/snowy/town_centers/snowy_meeting_point_1"), Math.max(villageMin, villageChance / 3)),
+          Pair.of(StructurePoolElement.legacy("village/snowy/town_centers/snowy_meeting_point_2"), Math.max(villageMin, villageChance / 6)),
+          Pair.of(StructurePoolElement.legacy("village/snowy/town_centers/snowy_meeting_point_3"), Math.max(villageMin, villageChance / 2)),
+          Pair.of(StructurePoolElement.legacy("village/snowy/zombie/town_centers/snowy_meeting_point_1"), Math.max(1, zombieChance / 3)),
+          Pair.of(StructurePoolElement.legacy("village/snowy/zombie/town_centers/snowy_meeting_point_2"), Math.max(1, zombieChance / 6)),
+          Pair.of(StructurePoolElement.legacy("village/snowy/zombie/town_centers/snowy_meeting_point_3"), Math.max(1, zombieChance / 2)));
+
+        villages.put(new ResourceLocation("asd"), snowy);
+
+        ImmutableList savanna =
           newListOf(Pair.of(StructurePoolElement.legacy("village/savanna/town_centers/savanna_meeting_point_1"), (int) (Math.max(villageMin, villageChance / 4.5))),
             Pair.of(StructurePoolElement.legacy("village/savanna/town_centers/savanna_meeting_point_2"), (int) (Math.max(villageMin, villageChance / 9))),
             Pair.of(StructurePoolElement.legacy("village/savanna/town_centers/savanna_meeting_point_3"), (int) (Math.max(villageMin, villageChance / 3))),
@@ -124,49 +135,29 @@ public class HostileVillages
             Pair.of(StructurePoolElement.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_1", ZOMBIE_SAVANNA), Math.max(1, (int) (zombieChance / 4.5))),
             Pair.of(StructurePoolElement.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_2", ZOMBIE_SAVANNA), Math.max(1, zombieChance / 9)),
             Pair.of(StructurePoolElement.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_3", ZOMBIE_SAVANNA), Math.max(1, zombieChance / 3)),
-            Pair.of(StructurePoolElement.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_4", ZOMBIE_SAVANNA), Math.max(1, zombieChance / 3))),
-          StructureTemplatePool.Projection.RIGID);
+            Pair.of(StructurePoolElement.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_4", ZOMBIE_SAVANNA), Math.max(1, zombieChance / 3)));
 
-        StructureTemplatePool desert = new StructureTemplatePool(new ResourceLocation("village/desert/town_centers"),
-          new ResourceLocation("empty"),
+        villages.put(new ResourceLocation("asd"), savanna);
+
+        ImmutableList desert =
           newListOf(Pair.of(StructurePoolElement.legacy("village/desert/town_centers/desert_meeting_point_1"), (int) (Math.max(villageMin, villageChance / 2.5))),
             Pair.of(StructurePoolElement.legacy("village/desert/town_centers/desert_meeting_point_2"), (int) (Math.max(villageMin, villageChance / 2.5))),
             Pair.of(StructurePoolElement.legacy("village/desert/town_centers/desert_meeting_point_3"), (int) (Math.max(villageMin, villageChance / 5))),
             Pair.of(StructurePoolElement.legacy("village/desert/zombie/town_centers/desert_meeting_point_1", ZOMBIE_DESERT), Math.max(1, (int) (zombieChance / 2.5))),
             Pair.of(StructurePoolElement.legacy("village/desert/zombie/town_centers/desert_meeting_point_2", ZOMBIE_DESERT), Math.max(1, (int) (zombieChance / 2.5))),
-            Pair.of(StructurePoolElement.legacy("village/desert/zombie/town_centers/desert_meeting_point_3", ZOMBIE_DESERT), Math.max(1, zombieChance / 5))),
-          StructureTemplatePool.Projection.RIGID);
+            Pair.of(StructurePoolElement.legacy("village/desert/zombie/town_centers/desert_meeting_point_3", ZOMBIE_DESERT), Math.max(1, zombieChance / 5)));
 
-        StructureTemplatePool taiga = new StructureTemplatePool(new ResourceLocation("village/taiga/town_centers"),
-          new ResourceLocation("empty"),
-          newListOf(Pair.of(StructurePoolElement.legacy("village/taiga/town_centers/taiga_meeting_point_1", ProcessorLists.MOSSIFY_10_PERCENT),
+        villages.put(new ResourceLocation("asd"), desert);
+
+        ImmutableList taiga =
+          newListOf(Pair.of(StructurePoolElement.legacy("village/taiga/town_centers/taiga_meeting_point_1", MOSSIFY_10_PERCENT),
               (int) Math.max(villageMin, (villageChance / 2))),
-            Pair.of(StructurePoolElement.legacy("village/taiga/town_centers/taiga_meeting_point_2", ProcessorLists.MOSSIFY_10_PERCENT),
+            Pair.of(StructurePoolElement.legacy("village/taiga/town_centers/taiga_meeting_point_2", MOSSIFY_10_PERCENT),
               (int) Math.max(villageMin, (villageChance / 2))),
             Pair.of(StructurePoolElement.legacy("village/taiga/zombie/town_centers/taiga_meeting_point_1", ZOMBIE_TAIGA), Math.max(1, (int) (zombieChance / 2))),
-            Pair.of(StructurePoolElement.legacy("village/taiga/zombie/town_centers/taiga_meeting_point_2", ZOMBIE_TAIGA), Math.max(1, (int) (zombieChance / 2)))),
-          StructureTemplatePool.Projection.RIGID);
+            Pair.of(StructurePoolElement.legacy("village/taiga/zombie/town_centers/taiga_meeting_point_2", ZOMBIE_TAIGA), Math.max(1, (int) (zombieChance / 2))));
 
-        patterns.put(plains.getName(), plains);
-        patterns.put(snowy.getName(), snowy);
-        patterns.put(savanna.getName(), savanna);
-        patterns.put(desert.getName(), desert);
-        patterns.put(taiga.getName(), taiga);
-    }
-    /**
-     * Get the replacement pattern for the given pattern
-     *
-     * @param pattern given
-     * @return possible replacement
-     */
-    public static StructureTemplatePool getReplacement(final StructureTemplatePool pattern)
-    {
-        if (patterns.containsKey(pattern.getName()))
-        {
-            return patterns.get(pattern.getName());
-        }
-
-        return null;
+        villages.put(new ResourceLocation("asd"), taiga);
     }
 
     public static ImmutableList<Pair<Function<StructureTemplatePool.Projection, ? extends StructurePoolElement>, Integer>> newListOf(Pair<Function<StructureTemplatePool.Projection, ? extends StructurePoolElement>, Integer>... args)
