@@ -12,7 +12,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingConversionEvent;
-import net.minecraftforge.event.entity.living.LivingSpawnEvent;
+import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -34,7 +34,7 @@ public class EventHandler
     private static EntityType excludedZombieVillager;
 
     @SubscribeEvent
-    public static void onLivingSpawn(final LivingSpawnEvent.CheckSpawn event)
+    public static void onLivingSpawn(final MobSpawnEvent.FinalizeSpawn event)
     {
         if (event.getEntity().getType() != EntityType.ZOMBIE_VILLAGER || event.getEntity().level.isClientSide)
         {
@@ -45,7 +45,7 @@ public class EventHandler
     }
 
     @SubscribeEvent
-    public static void onSpecialSpawn(final LivingSpawnEvent.SpecialSpawn event)
+    public static void onSpecialSpawn(final MobSpawnEvent.FinalizeSpawn event)
     {
         if (event.getEntity().getType() != EntityType.ZOMBIE_VILLAGER || event.getEntity().level.isClientSide)
         {
