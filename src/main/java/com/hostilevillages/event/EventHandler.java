@@ -36,7 +36,7 @@ public class EventHandler
     @SubscribeEvent
     public static void onLivingSpawn(final MobSpawnEvent.FinalizeSpawn event)
     {
-        if (event.getEntity().getType() != EntityType.ZOMBIE_VILLAGER || event.getEntity().level.isClientSide)
+        if (event.getEntity().getType() != EntityType.ZOMBIE_VILLAGER || event.getEntity().level().isClientSide)
         {
             return;
         }
@@ -47,7 +47,7 @@ public class EventHandler
     @SubscribeEvent
     public static void onSpecialSpawn(final MobSpawnEvent.FinalizeSpawn event)
     {
-        if (event.getEntity().getType() != EntityType.ZOMBIE_VILLAGER || event.getEntity().level.isClientSide)
+        if (event.getEntity().getType() != EntityType.ZOMBIE_VILLAGER || event.getEntity().level().isClientSide)
         {
             return;
         }
@@ -59,7 +59,7 @@ public class EventHandler
     public static void preLivingConversionEvent(final LivingConversionEvent.Pre event)
     {
         // Exclude natural spawn from village mechanics
-        if (!event.getEntity().level.isClientSide && event.getOutcome() == EntityType.ZOMBIE_VILLAGER)
+        if (!event.getEntity().level().isClientSide && event.getOutcome() == EntityType.ZOMBIE_VILLAGER)
         {
             excludedZombieVillager = event.getOutcome();
         }
@@ -105,10 +105,10 @@ public class EventHandler
                 return false;
             }
 
-            if (entity.blockPosition().distSqr(lastSpawn) > MAX_VILLAGE_DISTANCE || (villageDataSet != null && !villageDataSet.isValid(entity.level)))
+            if (entity.blockPosition().distSqr(lastSpawn) > MAX_VILLAGE_DISTANCE || (villageDataSet != null && !villageDataSet.isValid(entity.level())))
             {
                 villageDataSet = new RandomVillageDataSet();
-                villageDataSet.setWorldTimeStart(entity.level.getGameTime());
+                villageDataSet.setWorldTimeStart(entity.level().getGameTime());
             }
 
             lastSpawn = entity.blockPosition();
