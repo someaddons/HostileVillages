@@ -1,10 +1,10 @@
 package com.hostilevillages;
 
+import com.cupboard.config.CupboardConfig;
 import com.google.common.collect.ImmutableList;
 import com.hostilevillages.command.CommandFindPersistent;
-import com.hostilevillages.config.Configuration;
+import com.hostilevillages.config.CommonConfiguration;
 import com.hostilevillages.event.EventHandler;
-import com.hostilevillages.event.ModEventHandler;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.commands.CommandSourceStack;
@@ -22,7 +22,6 @@ import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
@@ -41,14 +40,12 @@ public class HostileVillages
 
     public static final Random                               rand     = new Random();
     public static final Logger                               LOGGER   = LogManager.getLogger();
-    public static       Configuration                        config   = new Configuration();
+    public static       CupboardConfig<CommonConfiguration>  config   = new CupboardConfig<>(MODID, new CommonConfiguration());
     public static       Map<ResourceLocation, ImmutableList> villages = new HashMap<>();
 
     public HostileVillages()
     {
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> "", (c, b) -> true));
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, config.getCommonConfig().ForgeConfigSpecBuilder);
-        Mod.EventBusSubscriber.Bus.MOD.bus().get().register(ModEventHandler.class);
         Mod.EventBusSubscriber.Bus.FORGE.bus().get().register(EventHandler.class);
         Mod.EventBusSubscriber.Bus.FORGE.bus().get().addListener(this::serverStart);
         Mod.EventBusSubscriber.Bus.FORGE.bus().get().addListener(this::onCommandsRegister);
@@ -76,9 +73,9 @@ public class HostileVillages
             final List<StructurePoolElement> list =
               event.getServer().registryAccess().registry(Registries.TEMPLATE_POOL).get().get(new ResourceLocation("minecraft:village/" + name + "/zombie/houses")).templates;
 
-            for (final String structure : HostileVillages.config.getCommonConfig().additionalStructures.get())
+            for (final String structure : HostileVillages.config.getCommonConfig().additionalStructures)
             {
-                for (int i = 0; i < config.getCommonConfig().additionalStructuresWeight.get(); i++)
+                for (int i = 0; i < config.getCommonConfig().additionalStructuresWeight; i++)
                 {
                     list.add(StructurePoolElement.legacy(structure).apply(StructureTemplatePool.Projection.RIGID));
                 }
@@ -97,7 +94,7 @@ public class HostileVillages
         Holder<StructureProcessorList> ZOMBIE_DESERT = holdergetter1.getOrThrow(ProcessorLists.ZOMBIE_DESERT);
         Holder<StructureProcessorList> ZOMBIE_TAIGA = holdergetter1.getOrThrow(ProcessorLists.ZOMBIE_TAIGA);
 
-        int villageChance = config.getCommonConfig().vanillaVillageChance.get();
+        int villageChance = config.getCommonConfig().vanillaVillageChance;
         int zombieChance = 100 - villageChance;
 
         int villageMin = villageChance > 0 ? 1 : 0;

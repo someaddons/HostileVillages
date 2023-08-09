@@ -97,7 +97,7 @@ public class RandomVillageDataSet
             ((GroundPathNavigation) entity.getNavigation()).setCanOpenDoors(true);
         }
 
-        if (!HostileVillages.config.getCommonConfig().generateLoot.get())
+        if (!HostileVillages.config.getCommonConfig().generateLoot)
         {
             return;
         }
@@ -117,7 +117,7 @@ public class RandomVillageDataSet
             world.addFreshEntity(en);
             en.setLootTable(loottables.get(HostileVillages.rand.nextInt(loottables.size())), HostileVillages.rand.nextInt(509));
 
-            if (HostileVillages.config.getCommonConfig().allowVanillaVillagerSpawn.get() && HostileVillages.config.getCommonConfig().villagesSpawnEggLoot.get())
+            if (HostileVillages.config.getCommonConfig().allowVanillaVillagerSpawn && HostileVillages.config.getCommonConfig().villagesSpawnEggLoot)
             {
                 for (int i = 0; i < 27; i++)
                 {
@@ -162,7 +162,7 @@ public class RandomVillageDataSet
         totalWeight = 0;
         possibleMonsters = new ArrayList<>();
         loottables = new ArrayList<>();
-        for (final String entry : HostileVillages.config.getCommonConfig().villageEntityTypes.get())
+        for (final String entry : HostileVillages.config.getCommonConfig().villageEntityTypes)
         {
             final String[] splitEntry = entry.split(";");
             if (splitEntry.length != 4)
@@ -216,7 +216,7 @@ public class RandomVillageDataSet
             possibleMonsters.add(new DataEntry(mainType, secondaryType, secondaryChance, weight));
         }
 
-        for (final String entry : HostileVillages.config.getCommonConfig().loottables.get())
+        for (final String entry : HostileVillages.config.getCommonConfig().loottables)
         {
             final ResourceLocation lootID = ResourceLocation.tryParse(entry);
             if (lootID == null)

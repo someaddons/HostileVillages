@@ -73,7 +73,7 @@ public class EventHandler
             return;
         }
 
-        if (HostileVillages.config.getCommonConfig().allowVanillaVillagerSpawn.get())
+        if (HostileVillages.config.getCommonConfig().allowVanillaVillagerSpawn)
         {
             return;
         }
@@ -100,7 +100,7 @@ public class EventHandler
     {
         if (entity.getType() == EntityType.VILLAGER || entity.getType() == EntityType.ZOMBIE_VILLAGER)
         {
-            if (HostileVillages.config.getCommonConfig().allowVanillaVillagerSpawn.get() && entity.getType() == EntityType.VILLAGER)
+            if (HostileVillages.config.getCommonConfig().allowVanillaVillagerSpawn && entity.getType() == EntityType.VILLAGER)
             {
                 return false;
             }
@@ -127,7 +127,7 @@ public class EventHandler
 
             boolean requirePersistance = entity instanceof Mob && ((Mob) entity).isPersistenceRequired();
 
-            for (int i = 0; i < HostileVillages.config.getCommonConfig().hostilePopulationSize.get(); i++)
+            for (int i = 0; i < HostileVillages.config.getCommonConfig().hostilePopulationSize; i++)
             {
                 final Entity replacementEntity = villageDataSet.getEntityReplacement().create(world.getLevel());
 
@@ -151,7 +151,7 @@ public class EventHandler
                     continue;
                 }
 
-                if (HostileVillages.config.getCommonConfig().debugLog.get())
+                if (HostileVillages.config.getCommonConfig().debugLog)
                 {
                     HostileVillages.LOGGER.info(
                       "Replacing entity: " + entity + " with entity: " + replacementEntity + " persistence:" + ((Mob) replacementEntity).isPersistenceRequired());

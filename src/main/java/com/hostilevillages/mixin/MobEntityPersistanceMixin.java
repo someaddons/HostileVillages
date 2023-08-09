@@ -15,7 +15,7 @@ public class MobEntityPersistanceMixin
     @Inject(method = "setItemSlotAndDropWhenKilled", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Mob;setGuaranteedDrop(Lnet/minecraft/world/entity/EquipmentSlot;)V", shift = At.Shift.AFTER), cancellable = true)
     private void noPersisting(final EquipmentSlot p_233657_1_, final ItemStack p_233657_2_, final CallbackInfo ci)
     {
-        if (HostileVillages.config.getCommonConfig().disableNoEntityDespawnWhenPickingItem.get())
+        if (HostileVillages.config.getCommonConfig().disableNoEntityDespawnWhenPickingItem)
         {
             ci.cancel();
         }
