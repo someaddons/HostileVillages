@@ -11,9 +11,6 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.living.LivingConversionEvent;
-import net.minecraftforge.event.entity.living.MobSpawnEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
@@ -30,40 +27,6 @@ public class EventHandler
     private static RandomVillageDataSet villageDataSet = new RandomVillageDataSet();
 
     private static List<Tuple<Entity, ServerLevel>> toAdd = new ArrayList<>();
-
-    private static EntityType excludedZombieVillager;
-
-    @SubscribeEvent
-    public static void onLivingSpawn(final MobSpawnEvent.FinalizeSpawn event)
-    {
-        if (event.getEntity().getType() != EntityType.ZOMBIE_VILLAGER || event.getEntity().level().isClientSide)
-        {
-            return;
-        }
-
-        excludedZombieVillager = event.getEntity().getType();
-    }
-
-    @SubscribeEvent
-    public static void onSpecialSpawn(final MobSpawnEvent.FinalizeSpawn event)
-    {
-        if (event.getEntity().getType() != EntityType.ZOMBIE_VILLAGER || event.getEntity().level().isClientSide)
-        {
-            return;
-        }
-
-        excludedZombieVillager = event.getEntity().getType();
-    }
-
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void preLivingConversionEvent(final LivingConversionEvent.Pre event)
-    {
-        // Exclude natural spawn from village mechanics
-        if (!event.getEntity().level().isClientSide && event.getOutcome() == EntityType.ZOMBIE_VILLAGER)
-        {
-            excludedZombieVillager = event.getOutcome();
-        }
-    }
 
     @SubscribeEvent
     public static void onEntityAdd(final EntityJoinLevelEvent event)

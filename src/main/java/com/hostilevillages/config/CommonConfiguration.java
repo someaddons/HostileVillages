@@ -1,7 +1,9 @@
 package com.hostilevillages.config;
 
 import com.cupboard.config.ICommonConfig;
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.hostilevillages.RandomVillageDataSet;
 
 import java.util.ArrayList;
@@ -10,8 +12,6 @@ import java.util.List;
 
 public class CommonConfiguration implements ICommonConfig
 {
-    static final Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
-
     public int          vanillaVillageChance                  = 0;
     public int          hostilePopulationSize                 = 5;
     public int          additionalStructuresWeight            = 2;
