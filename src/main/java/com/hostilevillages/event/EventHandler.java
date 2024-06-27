@@ -8,6 +8,7 @@ import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
@@ -61,6 +62,14 @@ public class EventHandler
      */
     public static boolean replaceEntityOnSpawn(final Entity entity, final ServerLevelAccessor world)
     {
+        if (entity instanceof IronGolem || entity.getType() == EntityType.IRON_GOLEM)
+        {
+            if (entity.blockPosition().distSqr(lastSpawn) < MAX_VILLAGE_DISTANCE && villageDataSet != null && villageDataSet.isValid(entity.level()))
+            {
+                return true;
+            }
+        }
+
         if (entity.getType() == EntityType.VILLAGER || entity.getType() == EntityType.ZOMBIE_VILLAGER)
         {
             if (HostileVillages.config.getCommonConfig().allowVanillaVillagerSpawn && entity.getType() == EntityType.VILLAGER)

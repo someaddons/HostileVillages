@@ -46,6 +46,7 @@ public class HostileVillages
         villages.add(new ResourceLocation("worldgen/template_pool/village/desert/town_centers.json"));
         villages.add(new ResourceLocation("worldgen/template_pool/village/taiga/town_centers.json"));
     }
+
     public HostileVillages()
     {
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> "", (c, b) -> true));
@@ -53,8 +54,6 @@ public class HostileVillages
         Mod.EventBusSubscriber.Bus.FORGE.bus().get().addListener(this::serverStart);
         Mod.EventBusSubscriber.Bus.FORGE.bus().get().addListener(this::onCommandsRegister);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-
-        //PlainVillagePools.bootstrap(null);
     }
 
     public static void adjustVillageSpawns(final JsonArray elements)
@@ -64,7 +63,7 @@ public class HostileVillages
 
         for (final JsonElement entry : elements)
         {
-            if (entry instanceof JsonObject jsonObject)
+            if (entry instanceof JsonObject jsonObject && jsonObject.has("element") && jsonObject.get("element").getAsJsonObject().has("location"))
             {
                 if (jsonObject.get("element").getAsJsonObject().get("location").getAsString().contains("zombie"))
                 {
