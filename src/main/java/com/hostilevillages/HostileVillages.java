@@ -57,7 +57,7 @@ public class HostileVillages implements ModInitializer {
 
         for (final JsonElement entry : elements)
         {
-            if (entry instanceof JsonObject jsonObject)
+            if (entry instanceof JsonObject jsonObject && jsonObject.has("element") && jsonObject.get("element").getAsJsonObject().has("location"))
             {
                 if (jsonObject.get("element").getAsJsonObject().get("location").getAsString().contains("zombie"))
                 {
