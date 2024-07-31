@@ -1,12 +1,16 @@
 package com.hostilevillages;
 
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.goal.BreakDoorGoal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.util.GoalUtils;
@@ -15,11 +19,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -49,7 +53,7 @@ public class RandomVillageDataSet
 
     private long worldTimeStart = 0;
 
-    public RandomVillageDataSet()
+    public RandomVillageDataSet(final ServerLevelAccessor world)
     {
         final int chosen = HostileVillages.rand.nextInt(totalWeight);
 
@@ -70,7 +74,7 @@ public class RandomVillageDataSet
         }
 
         mendingArmor = new ItemStack(Items.IRON_CHESTPLATE);
-        EnchantmentHelper.setEnchantments(Collections.singletonMap(Enchantments.MENDING, 1), mendingArmor);
+        EnchantmentHelper.updateEnchantments(mendingArmor,mutable -> mutable.set(world.registryAccess().registry(Registries.ENCHANTMENT).get().getHolder(Enchantments.MENDING).get(),1));
     }
 
     public EntityType getEntityReplacement()
@@ -87,12 +91,12 @@ public class RandomVillageDataSet
     {
         spawnedEntities++;
         // Sun lotion
-        if (entity.getMobType() == MobType.UNDEAD && entity.isPersistenceRequired())
+        if (entity.getType().is(EntityTypeTags.UNDEAD) && entity.isPersistenceRequired())
         {
             entity.setItemSlot(EquipmentSlot.HEAD, Items.LEATHER_HELMET.getDefaultInstance());
         }
 
-        entity.finalizeSpawn(world, world.getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.STRUCTURE, null, null);
+        entity.finalizeSpawn(world, world.getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.STRUCTURE, null);
 
         // Register the break door goal once, it wont persist but let them break intial doors
         entity.goalSelector.addGoal(0, new BreakDoorGoal(entity, difficulty -> true));
@@ -106,8 +110,8 @@ public class RandomVillageDataSet
             return;
         }
 
-        if (entity.isPersistenceRequired() && spawnedEntities > 12 && mendingArmor != null && (entity.getMobType() == MobType.UNDEAD
-                                                                                                 || entity.getMobType() == MobType.ILLAGER))
+        if (entity.isPersistenceRequired() && spawnedEntities > 12 && mendingArmor != null && (entity.getType().is(EntityTypeTags.UNDEAD)
+                                                                                                 || entity.getType().is(EntityTypeTags.ILLAGER)))
         {
             entity.setItemSlot(EquipmentSlot.CHEST, mendingArmor);
             entity.setGuaranteedDrop(EquipmentSlot.CHEST);
@@ -119,7 +123,7 @@ public class RandomVillageDataSet
             final MinecartChest en = EntityType.CHEST_MINECART.create(world.getLevel());
             en.setPos(entity.getX(), entity.getY(), entity.getZ());
             world.addFreshEntity(en);
-            en.setLootTable(loottables.get(HostileVillages.rand.nextInt(loottables.size())), HostileVillages.rand.nextInt(509));
+            en.setLootTable(ResourceKey.create(Registries.LOOT_TABLE, loottables.get(HostileVillages.rand.nextInt(loottables.size()))));
 
             if (HostileVillages.config.getCommonConfig().allowVanillaVillagerSpawn && HostileVillages.config.getCommonConfig().villagesSpawnEggLoot)
             {

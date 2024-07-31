@@ -23,7 +23,7 @@ public class EventHandler
     private final static int MAX_VILLAGE_DISTANCE = 200 * 200;
 
     private static BlockPos             lastSpawn      = BlockPos.ZERO;
-    private static RandomVillageDataSet villageDataSet = new RandomVillageDataSet();
+    private static RandomVillageDataSet villageDataSet = null;
 
     private static List<Tuple<Entity, ServerLevel>> toAdd = new ArrayList<>();
 
@@ -56,6 +56,11 @@ public class EventHandler
      */
     public static boolean replaceEntityOnSpawn(final Entity entity, final ServerLevelAccessor world)
     {
+        if (villageDataSet == null)
+        {
+            new RandomVillageDataSet(world);
+        }
+
         if (entity instanceof IronGolem || entity.getType() == EntityType.IRON_GOLEM)
         {
             if (entity.blockPosition().distSqr(lastSpawn) < MAX_VILLAGE_DISTANCE && villageDataSet != null && villageDataSet.isValid(entity.level()))
@@ -73,7 +78,7 @@ public class EventHandler
 
             if (entity.blockPosition().distSqr(lastSpawn) > MAX_VILLAGE_DISTANCE || (villageDataSet != null && !villageDataSet.isValid(entity.level())))
             {
-                villageDataSet = new RandomVillageDataSet();
+                villageDataSet = new RandomVillageDataSet(world);
                 villageDataSet.setWorldTimeStart(entity.level().getGameTime());
             }
 

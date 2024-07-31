@@ -36,11 +36,11 @@ public class HostileVillages implements ModInitializer {
     public static Set<ResourceLocation> villages = new HashSet<>();
     static
     {
-        villages.add(new ResourceLocation("worldgen/template_pool/village/plains/town_centers.json"));
-        villages.add(new ResourceLocation("worldgen/template_pool/village/snowy/town_centers.json"));
-        villages.add(new ResourceLocation("worldgen/template_pool/village/savanna/town_centers.json"));
-        villages.add(new ResourceLocation("worldgen/template_pool/village/desert/town_centers.json"));
-        villages.add(new ResourceLocation("worldgen/template_pool/village/taiga/town_centers.json"));
+        villages.add(ResourceLocation.withDefaultNamespace("worldgen/template_pool/village/plains/town_centers.json"));
+        villages.add(ResourceLocation.withDefaultNamespace("worldgen/template_pool/village/snowy/town_centers.json"));
+        villages.add(ResourceLocation.withDefaultNamespace("worldgen/template_pool/village/savanna/town_centers.json"));
+        villages.add(ResourceLocation.withDefaultNamespace("worldgen/template_pool/village/desert/town_centers.json"));
+        villages.add(ResourceLocation.withDefaultNamespace("worldgen/template_pool/village/taiga/town_centers.json"));
     }
 
     @Override
@@ -84,7 +84,7 @@ public class HostileVillages implements ModInitializer {
         for (final String name : Arrays.asList("plains", "savanna", "snowy", "taiga", "desert"))
         {
             final List<StructurePoolElement> list =
-              server.registryAccess().registry(Registries.TEMPLATE_POOL).get().get(new ResourceLocation("minecraft:village/" + name + "/zombie/houses")).templates;
+              server.registryAccess().registry(Registries.TEMPLATE_POOL).get().get(ResourceLocation.tryParse("minecraft:village/" + name + "/zombie/houses")).templates;
 
             for (final String structure : HostileVillages.config.getCommonConfig().additionalStructures)
             {

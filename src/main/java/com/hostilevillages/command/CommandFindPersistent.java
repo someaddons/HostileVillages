@@ -4,7 +4,9 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -72,7 +74,7 @@ public class CommandFindPersistent implements IMCOPCommand
             {
                 if (((Mob) searchEntity).getItemBySlot(EquipmentSlot.HEAD).getItem() == Items.LEATHER_HELMET ||
                       (((Mob) searchEntity).getItemBySlot(EquipmentSlot.CHEST).getItem() == Items.IRON_CHESTPLATE
-                         && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MENDING, ((Mob) searchEntity).getItemBySlot(EquipmentSlot.CHEST)) > 0))
+                         && EnchantmentHelper.getItemEnchantmentLevel(searchEntity.level().registryAccess().registry(Registries.ENCHANTMENT).get().getHolder(Enchantments.MENDING).get(), ((Mob) searchEntity).getItemBySlot(EquipmentSlot.CHEST)) > 0))
                 {
                     searchEntity.remove(Entity.RemovalReason.DISCARDED);
                     killedEntities++;
