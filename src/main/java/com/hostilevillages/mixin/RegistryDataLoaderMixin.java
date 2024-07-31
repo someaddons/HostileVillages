@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.hostilevillages.HostileVillages;
 import com.mojang.serialization.Decoder;
+import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.FileToIdConverter;
@@ -26,27 +27,19 @@ import java.util.Map;
 @Mixin(RegistryDataLoader.class)
 public class RegistryDataLoaderMixin
 {
-    @Inject(method = "loadRegistryContents", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Decoder;parse(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;", remap = false), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
+    @Inject(method = "loadElementFromResource", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Decoder;parse(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;", remap = false), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
     private static <E> void onLoad(
-      final RegistryOps.RegistryInfoLookup registryInfoLookup,
-      final ResourceManager resourceManager,
-      final ResourceKey<? extends Registry<E>> resourceKey,
       final WritableRegistry<E> writableRegistry,
       final Decoder<E> decoder,
-      final Map<ResourceKey<?>, Exception> map,
-      final CallbackInfo ci,
-      final String string,
-      final FileToIdConverter fileToIdConverter,
-      final RegistryOps registryOps,
-      final Iterator var9,
-      final Map.Entry entry,
-      final ResourceLocation resourceLocation,
-      final ResourceKey resourceKey2,
+      final RegistryOps<JsonElement> registryOps,
+      final ResourceKey<E> resourceKey,
       final Resource resource,
+      final RegistrationInfo registrationInfo,
+      final CallbackInfo ci,
       final Reader reader,
       final JsonElement jsonElement)
     {
-        if (HostileVillages.villages.contains(resourceLocation))
+        if (HostileVillages.villages.contains(resourceKey.location()))
         {
             if (jsonElement instanceof JsonObject)
             {

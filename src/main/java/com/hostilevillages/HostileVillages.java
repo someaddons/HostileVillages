@@ -36,11 +36,11 @@ public class HostileVillages implements ModInitializer {
     public static Set<ResourceLocation> villages = new HashSet<>();
     static
     {
-        villages.add(ResourceLocation.withDefaultNamespace("worldgen/template_pool/village/plains/town_centers.json"));
-        villages.add(ResourceLocation.withDefaultNamespace("worldgen/template_pool/village/snowy/town_centers.json"));
-        villages.add(ResourceLocation.withDefaultNamespace("worldgen/template_pool/village/savanna/town_centers.json"));
-        villages.add(ResourceLocation.withDefaultNamespace("worldgen/template_pool/village/desert/town_centers.json"));
-        villages.add(ResourceLocation.withDefaultNamespace("worldgen/template_pool/village/taiga/town_centers.json"));
+        villages.add(ResourceLocation.withDefaultNamespace("village/plains/town_centers"));
+        villages.add(ResourceLocation.withDefaultNamespace("village/snowy/town_centers"));
+        villages.add(ResourceLocation.withDefaultNamespace("village/savanna/town_centers"));
+        villages.add(ResourceLocation.withDefaultNamespace("village/desert/town_centers"));
+        villages.add(ResourceLocation.withDefaultNamespace("village/taiga/town_centers"));
     }
 
     @Override
