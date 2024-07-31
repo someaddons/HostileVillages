@@ -13,13 +13,13 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
-import net.minecraftforge.fml.IExtensionPoint;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,20 +40,18 @@ public class HostileVillages
     public static       Set<ResourceLocation>               villages = new HashSet<>();
     static
     {
-        villages.add(new ResourceLocation("worldgen/template_pool/village/plains/town_centers.json"));
-        villages.add(new ResourceLocation("worldgen/template_pool/village/snowy/town_centers.json"));
-        villages.add(new ResourceLocation("worldgen/template_pool/village/savanna/town_centers.json"));
-        villages.add(new ResourceLocation("worldgen/template_pool/village/desert/town_centers.json"));
-        villages.add(new ResourceLocation("worldgen/template_pool/village/taiga/town_centers.json"));
+        villages.add(ResourceLocation.withDefaultNamespace("village/plains/town_centers"));
+        villages.add(ResourceLocation.withDefaultNamespace("village/snowy/town_centers"));
+        villages.add(ResourceLocation.withDefaultNamespace("village/savanna/town_centers"));
+        villages.add(ResourceLocation.withDefaultNamespace("village/desert/town_centers"));
+        villages.add(ResourceLocation.withDefaultNamespace("village/taiga/town_centers"));
     }
-
-    public HostileVillages()
+    public HostileVillages(IEventBus modEventBus, ModContainer modContainer)
     {
-        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> "", (c, b) -> true));
-        Mod.EventBusSubscriber.Bus.FORGE.bus().get().register(EventHandler.class);
-        Mod.EventBusSubscriber.Bus.FORGE.bus().get().addListener(this::serverStart);
-        Mod.EventBusSubscriber.Bus.FORGE.bus().get().addListener(this::onCommandsRegister);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+        NeoForge.EVENT_BUS.register(EventHandler.class);
+        NeoForge.EVENT_BUS.addListener(this::serverStart);
+        NeoForge.EVENT_BUS.addListener(this::onCommandsRegister);
+        modEventBus.addListener(this::setup);
     }
 
     public static void adjustVillageSpawns(final JsonArray elements)
@@ -96,7 +94,7 @@ public class HostileVillages
         for (final String name : Arrays.asList("plains", "savanna", "snowy", "taiga", "desert"))
         {
             final List<StructurePoolElement> list =
-              event.getServer().registryAccess().registry(Registries.TEMPLATE_POOL).get().get(new ResourceLocation("minecraft:village/" + name + "/zombie/houses")).templates;
+              event.getServer().registryAccess().registry(Registries.TEMPLATE_POOL).get().get(ResourceLocation.tryParse("minecraft:village/" + name + "/zombie/houses")).templates;
 
             for (final String structure : HostileVillages.config.getCommonConfig().additionalStructures)
             {
