@@ -24,6 +24,8 @@ public class EventHandler
 {
     private final static int MAX_VILLAGE_DISTANCE = 200 * 200;
 
+    private final static String DISTANT_HORIZONS_REGION = "com.seibel.distanthorizons.common.wrappers.worldGeneration.mimicObject.DhLitWorldGenRegion_forge";
+
     private static BlockPos             lastSpawn      = BlockPos.ZERO;
     private static RandomVillageDataSet villageDataSet = new RandomVillageDataSet();
 
@@ -62,6 +64,11 @@ public class EventHandler
      */
     public static boolean replaceEntityOnSpawn(final Entity entity, final ServerLevelAccessor world)
     {
+        if (isDistantHorizonsRegion(world))
+        {
+            return false;
+        }
+
         if (entity instanceof IronGolem || entity.getType() == EntityType.IRON_GOLEM)
         {
             if (entity.blockPosition().distSqr(lastSpawn) < MAX_VILLAGE_DISTANCE && villageDataSet != null && villageDataSet.isValid(entity.level()))
@@ -134,6 +141,31 @@ public class EventHandler
             }
 
             return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Distant Horizons generates distant terrain in temporary regions and discards the entities created there, so their
+     * replacements must not be queued into the live level. Checked by class name to keep Distant Horizons optional.
+     *
+     * @param world accessor the entity spawns in
+     * @return true if it is a Distant Horizons generation region or a subclass of one
+     */
+    private static boolean isDistantHorizonsRegion(final ServerLevelAccessor world)
+    {
+        if (world == null)
+        {
+            return false;
+        }
+
+        for (Class<?> type = world.getClass(); type != null; type = type.getSuperclass())
+        {
+            if (type.getName().equals(DISTANT_HORIZONS_REGION))
+            {
+                return true;
+            }
         }
 
         return false;
