@@ -15,7 +15,9 @@ import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Handler to catch server tick events
@@ -27,7 +29,18 @@ public class EventHandler
     private static BlockPos             lastSpawn      = BlockPos.ZERO;
     private static RandomVillageDataSet villageDataSet = new RandomVillageDataSet();
 
-    private static List<Tuple<Entity, ServerLevel>> toAdd = new ArrayList<>();
+    /**
+     * Filled by worldgen threads, emptied by the server thread
+     */
+    private static List<Tuple<Entity, ServerLevel>> toAdd = Collections.synchronizedList(new ArrayList<>());
+
+    /**
+     * Longest time the queue waits for the chunk of an entity to finish generating
+     */
+    private final static long MAX_CHUNK_WAIT = TimeUnit.MINUTES.toNanos(5);
+
+    private static Tuple<Entity, ServerLevel> waitingEntry = null;
+    private static long                       waitingSince = 0;
 
     @SubscribeEvent
     public static void onEntityAdd(final EntityJoinLevelEvent event)
@@ -149,7 +162,7 @@ public class EventHandler
 
         if (!toAdd.isEmpty())
         {
-            while (!toAdd.isEmpty())
+            while (!toAdd.isEmpty() && !shouldWaitForChunk(toAdd.get(0)))
             {
                 Tuple<Entity, ServerLevel> tuple = toAdd.remove(0);
                 tuple.getB().addFreshEntity(tuple.getA());
@@ -160,5 +173,48 @@ public class EventHandler
                 }
             }
         }
+    }
+
+    /**
+     * The spawn setup looks up the difficulty at the entity, which reads its chunk whenever a player or a pregenerator has requested
+     * that chunk. While the chunk is still generating the server thread would have to wait for it, so the entity stays queued until
+     * the chunk is done or no longer requested.
+     *
+     * @param tuple next queued entity and its level
+     * @return true if the queue should wait
+     */
+    private static boolean shouldWaitForChunk(final Tuple<Entity, ServerLevel> tuple)
+    {
+        final Entity entity = tuple.getA();
+        final ServerLevel level = tuple.getB();
+        final BlockPos pos = entity.blockPosition();
+
+        if (!(entity instanceof Mob) || !level.hasChunkAt(pos) || level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4) != null)
+        {
+            waitingEntry = null;
+            return false;
+        }
+
+        if (waitingEntry != tuple)
+        {
+            waitingEntry = tuple;
+            waitingSince = System.nanoTime();
+
+            if (HostileVillages.config.getCommonConfig().debugLog)
+            {
+                HostileVillages.LOGGER.info("Delaying spawn until the chunk has finished generating for entity: " + entity);
+            }
+
+            return true;
+        }
+
+        if (System.nanoTime() - waitingSince >= MAX_CHUNK_WAIT)
+        {
+            HostileVillages.LOGGER.warn("Chunk did not finish generating within five minutes, spawning anyway: " + entity);
+            waitingEntry = null;
+            return false;
+        }
+
+        return true;
     }
 }
